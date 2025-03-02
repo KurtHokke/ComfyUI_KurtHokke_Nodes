@@ -1,6 +1,7 @@
 '''
     !DISCLAIMER! I'm very new to programming and I've been heavily inspired by following.
 https://github.com/crystian/ComfyUI-Crystools
+https://github.com/cubiq/ComfyUI_essentials
   Many thanks goes to these awesome developers!
 '''
 from enum import Enum
@@ -14,3 +15,9 @@ class CLASSES(Enum):
     BOOLEANTOPIPE_DESC = prefix + 'Boolean To Pipe'
     BOOLEANFROMPIPE_NAME = 'Boolean From Pipe'
     BOOLEANFROMPIPE_DESC = prefix + 'Boolean From Pipe'
+    EXPMATH_NAME = 'ExpMath'
+    EXPMATH_DESC = prefix + 'ExpMath'
+    EXPMATHDUAL_NAME = 'ExpMathDual'
+    EXPMATHDUAL_DESC = prefix + 'ExpMathDual'
+    EXPMATHQUAD_NAME = 'ExpMathQuad'
+    EXPMATHQUAD_DESC = prefix + 'ExpMathQuad'

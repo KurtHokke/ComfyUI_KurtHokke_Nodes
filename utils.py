@@ -1,6 +1,7 @@
 '''
     !DISCLAIMER! I'm very new to programming and I've been heavily inspired by following.
 https://github.com/crystian/ComfyUI-Crystools
+https://github.com/cubiq/ComfyUI_essentials
   Many thanks goes to these awesome developers!
 '''
 import sys
@@ -45,3 +46,4 @@ any = AnyType("*")
 class CATEGORY(Enum):
   MAIN = "🛸KurtHokke"
   UTILS = "/Utils"
+  MATH = "/Math"
