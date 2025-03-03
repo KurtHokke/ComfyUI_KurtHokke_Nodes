@@ -29,6 +29,8 @@ class CLASSES(Enum):
     SAMPLERSEL_DESC = prefix + 'SamplerSel'
     SCHEDULERSEL_NAME = 'SchedulerSel'
     SCHEDULERSEL_DESC = prefix + 'SchedulerSel'
+    LORAFLUXPARAMS_NAME = 'LoraFluxParams'
+    LORAFLUXPARAMS_DESC = prefix + 'LoraFluxParams'
 
 
 class CATEGORY(Enum):
@@ -36,3 +38,4 @@ class CATEGORY(Enum):
   UTILS = "/Utils"
   MATH = "/Math"
   MISC = "/Misc"
+  SAMPLING = "/Sampling"

@@ -4,6 +4,8 @@ from nodes import MAX_RESOLUTION
 import torch
 import comfy.samplers
 import comfy.sample
+import folder_paths
+from ..utils import parse_string_to_list
 
 class EmptyLatentSize:
     def __init__(self):
@@ -52,7 +54,7 @@ class EmptyLatentSize64:
 
 
 class SamplerSel:
-    CATEGORY = CATEGORY.MAIN.value + CATEGORY.MISC.value
+    CATEGORY = CATEGORY.MAIN.value + CATEGORY.SAMPLING.value
     RETURN_TYPES = ("STRING",)
     FUNCTION = "get_names"
 
@@ -65,7 +67,7 @@ class SamplerSel:
 
 
 class SchedulerSel:
-    CATEGORY = CATEGORY.MAIN.value + CATEGORY.MISC.value
+    CATEGORY = CATEGORY.MAIN.value + CATEGORY.SAMPLING.value
     RETURN_TYPES = ("STRING",)
     FUNCTION = "get_names"
 
@@ -75,3 +77,50 @@ class SchedulerSel:
 
     def get_names(self, scheduler):
         return (scheduler,)
+
+
+class LoraFluxParams:
+    @classmethod
+    def INPUT_TYPES(s):
+        optional_loras = ['none'] + folder_paths.get_filename_list("loras")
+        return {
+            "required": {
+                "lora_1": (folder_paths.get_filename_list("loras"), {"tooltip": "The name of the LoRA."}),
+                "strength_model_1": ("STRING", { "multiline": False, "dynamicPrompts": False, "default": "1.0" }),
+            },
+            "optional": {
+                "lora_2": (optional_loras, ),
+                "strength_lora_2": ("STRING", { "multiline": False, "dynamicPrompts": False }),
+                "lora_3": (optional_loras, ),
+                "strength_lora_3": ("STRING", { "multiline": False, "dynamicPrompts": False }),
+                "lora_4": (optional_loras, ),
+                "strength_lora_4": ("STRING", { "multiline": False, "dynamicPrompts": False }),
+            }
+        }
+
+    RETURN_TYPES = ("LORA_PARAMS", )
+    FUNCTION = "execute"
+    CATEGORY = CATEGORY.MAIN.value + CATEGORY.SAMPLING.value
+
+    def execute(self, lora_1, strength_model_1, lora_2="none", strength_lora_2="", lora_3="none", strength_lora_3="", lora_4="none", strength_lora_4=""):
+        output = { "loras": [], "strengths": [] }
+        output["loras"].append(lora_1)
+        output["strengths"].append(parse_string_to_list(strength_model_1))
+
+        if lora_2 != "none":
+            output["loras"].append(lora_2)
+            if strength_lora_2 == "":
+                strength_lora_2 = "1.0"
+            output["strengths"].append(parse_string_to_list(strength_lora_2))
+        if lora_3 != "none":
+            output["loras"].append(lora_3)
+            if strength_lora_3 == "":
+                strength_lora_3 = "1.0"
+            output["strengths"].append(parse_string_to_list(strength_lora_3))
+        if lora_4 != "none":
+            output["loras"].append(lora_4)
+            if strength_lora_4 == "":
+                strength_lora_4 = "1.0"
+            output["strengths"].append(parse_string_to_list(strength_lora_4))
+
+        return (output,)

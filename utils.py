@@ -38,3 +38,41 @@ class AnyType(str):
 
 any = AnyType("*")
 
+
+def parse_string_to_list(s):
+    elements = s.split(',')
+    result = []
+"""Stolen from https://github.com/cubiq/ComfyUI_essentials"""
+    def parse_number(s):
+        try:
+            if '.' in s:
+                return float(s)
+            else:
+                return int(s)
+        except ValueError:
+            return 0
+
+    def decimal_places(s):
+        if '.' in s:
+            return len(s.split('.')[1])
+        return 0
+
+    for element in elements:
+        element = element.strip()
+        if '...' in element:
+            start, rest = element.split('...')
+            end, step = rest.split('+')
+            decimals = decimal_places(step)
+            start = parse_number(start)
+            end = parse_number(end)
+            step = parse_number(step)
+            current = start
+            if (start > end and step > 0) or (start < end and step < 0):
+                step = -step
+            while current <= end:
+                result.append(round(current, decimals))
+                current += step
+        else:
+            result.append(round(parse_number(element), decimal_places(element)))
+
+    return result

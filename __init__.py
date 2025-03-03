@@ -7,7 +7,7 @@ https://github.com/cubiq/ComfyUI_essentials
 from .names import CLASSES
 from .nodes.pipe import BooleanToPipe, BooleanFromPipe
 from .nodes.math import ExpMath, ExpMathDual, ExpMathQuad
-from .nodes.misc import EmptyLatentSize, EmptyLatentSize64, SchedulerSel, SamplerSel
+from .nodes.misc import EmptyLatentSize, EmptyLatentSize64, SchedulerSel, SamplerSel, LoraFluxParams
 
 
 NODE_CLASS_MAPPINGS = {
@@ -20,6 +20,7 @@ NODE_CLASS_MAPPINGS = {
   CLASSES.EMPTYLATENTSIZE64_NAME.value: EmptyLatentSize64,
   CLASSES.SAMPLERSEL_NAME.value: SamplerSel,
   CLASSES.SCHEDULERSEL_NAME.value: SchedulerSel,
+  CLASSES.LORAFLUXPARAMS_NAME.value: LoraFluxParams,
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
@@ -32,6 +33,7 @@ NODE_DISPLAY_NAME_MAPPINGS = {
   CLASSES.EMPTYLATENTSIZE64_NAME.value: CLASSES.EMPTYLATENTSIZE64_DESC.value,
   CLASSES.SAMPLERSEL_NAME.value: CLASSES.SAMPLERSEL_DESC.value,
   CLASSES.SCHEDULERSEL_NAME.value: CLASSES.SCHEDULERSEL_DESC.value,
+  CLASSES.LORAFLUXPARAMS_NAME.value: CLASSES.LORAFLUXPARAMS_DESC.value,
 }
 
 __all__ = ["NODE_CLASS_MAPPINGS", "NODE_DISPLAY_NAME_MAPPINGS"]
