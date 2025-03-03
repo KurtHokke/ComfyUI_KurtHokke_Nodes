@@ -25,6 +25,10 @@ class CLASSES(Enum):
     EMPTYLATENTSIZE_DESC = prefix + 'EmptyLatentSize'
     EMPTYLATENTSIZE64_NAME = 'EmptyLatentSize64'
     EMPTYLATENTSIZE64_DESC = prefix + 'EmptyLatentSize64'
+    SAMPLERSEL_NAME = 'SamplerSel'
+    SAMPLERSEL_DESC = prefix + 'SamplerSel'
+    SCHEDULERSEL_NAME = 'SchedulerSel'
+    SCHEDULERSEL_DESC = prefix + 'SchedulerSel'
 
 
 class CATEGORY(Enum):
