@@ -5,7 +5,6 @@ https://github.com/cubiq/ComfyUI_essentials
   Many thanks goes to these awesome developers!
 '''
 import sys
-from enum import Enum
 
 FLOAT = ("FLOAT", {"default": 1,
                    "min": -sys.float_info.max,
@@ -39,11 +38,3 @@ class AnyType(str):
 
 any = AnyType("*")
 
-'''
-##################################################
-'''
-
-class CATEGORY(Enum):
-  MAIN = "🛸KurtHokke"
-  UTILS = "/Utils"
-  MATH = "/Math"

@@ -21,3 +21,14 @@ class CLASSES(Enum):
     EXPMATHDUAL_DESC = prefix + 'ExpMathDual'
     EXPMATHQUAD_NAME = 'ExpMathQuad'
     EXPMATHQUAD_DESC = prefix + 'ExpMathQuad'
+    EMPTYLATENTSIZE_NAME = 'EmptyLatentSize'
+    EMPTYLATENTSIZE_DESC = prefix + 'EmptyLatentSize'
+    EMPTYLATENTSIZE64_NAME = 'EmptyLatentSize64'
+    EMPTYLATENTSIZE64_DESC = prefix + 'EmptyLatentSize64'
+
+
+class CATEGORY(Enum):
+  MAIN = "🛸KurtHokke"
+  UTILS = "/Utils"
+  MATH = "/Math"
+  MISC = "/Misc"

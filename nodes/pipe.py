@@ -4,7 +4,8 @@ https://github.com/crystian/ComfyUI-Crystools
 https://github.com/cubiq/ComfyUI_essentials
   Many thanks goes to these awesome developers!
 '''
-from ..utils import any, BOOLEAN, INT, FLOAT, STRING, CATEGORY
+from ..utils import any, BOOLEAN, INT, FLOAT, STRING
+from ..names import CATEGORY
 import math
 import torch
 import time
