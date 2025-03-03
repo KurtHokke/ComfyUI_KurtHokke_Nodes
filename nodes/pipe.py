@@ -31,16 +31,14 @@ class BooleanToPipe:
     FUNCTION = "execute"
 
     def execute(self, boolean_1=True, boolean_2=True, boolean_3=True, boolean_4=True):
-        # Create a list to hold the boolean values
+
         BoolPipeMod = []
 
-        # Append the boolean values directly
         BoolPipeMod.append(boolean_1)
         BoolPipeMod.append(boolean_2)
         BoolPipeMod.append(boolean_3)
         BoolPipeMod.append(boolean_4)
 
-        # Return the list as separate boolean outputs
         return (BoolPipeMod,)
 
 class BooleanFromPipe:

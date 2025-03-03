@@ -8,6 +8,7 @@ from .names import CLASSES
 from .nodes.pipe import BooleanToPipe, BooleanFromPipe
 from .nodes.math import ExpMath, ExpMathDual, ExpMathQuad
 from .nodes.misc import EmptyLatentSize, EmptyLatentSize64, SchedulerSel, SamplerSel, LoraFluxParams
+from .nodes.models import LoadUnetAndClip, UnetClipLoraLoader
 
 
 NODE_CLASS_MAPPINGS = {
@@ -21,6 +22,8 @@ NODE_CLASS_MAPPINGS = {
   CLASSES.SAMPLERSEL_NAME.value: SamplerSel,
   CLASSES.SCHEDULERSEL_NAME.value: SchedulerSel,
   CLASSES.LORAFLUXPARAMS_NAME.value: LoraFluxParams,
+  CLASSES.LOADUNETANDCLIP_NAME.value: LoadUnetAndClip,
+  CLASSES.UNETCLIPLORALOADER_NAME.value: UnetClipLoraLoader,
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
@@ -34,6 +37,8 @@ NODE_DISPLAY_NAME_MAPPINGS = {
   CLASSES.SAMPLERSEL_NAME.value: CLASSES.SAMPLERSEL_DESC.value,
   CLASSES.SCHEDULERSEL_NAME.value: CLASSES.SCHEDULERSEL_DESC.value,
   CLASSES.LORAFLUXPARAMS_NAME.value: CLASSES.LORAFLUXPARAMS_DESC.value,
+  CLASSES.LOADUNETANDCLIP_NAME.value: CLASSES.LOADUNETANDCLIP_DESC.value,
+  CLASSES.UNETCLIPLORALOADER_NAME.value: CLASSES.UNETCLIPLORALOADER_DESC.value,
 }
 
 __all__ = ["NODE_CLASS_MAPPINGS", "NODE_DISPLAY_NAME_MAPPINGS"]

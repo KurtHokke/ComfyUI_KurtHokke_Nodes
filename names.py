@@ -31,7 +31,10 @@ class CLASSES(Enum):
     SCHEDULERSEL_DESC = prefix + 'SchedulerSel'
     LORAFLUXPARAMS_NAME = 'LoraFluxParams'
     LORAFLUXPARAMS_DESC = prefix + 'LoraFluxParams'
-
+    LOADUNETANDCLIP_NAME = 'LoadUnetAndClip'
+    LOADUNETANDCLIP_DESC = prefix + 'LoadUnetAndClip'
+    UNETCLIPLORALOADER_NAME = 'UnetClipLoraLoader'
+    UNETCLIPLORALOADER_DESC = prefix + 'UnetClipLoraLoader'
 
 class CATEGORY(Enum):
   MAIN = "🛸KurtHokke"
@@ -39,3 +42,4 @@ class CATEGORY(Enum):
   MATH = "/Math"
   MISC = "/Misc"
   SAMPLING = "/Sampling"
+  LOADERS = "/Loaders"
