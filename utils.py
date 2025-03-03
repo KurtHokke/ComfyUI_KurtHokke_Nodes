@@ -42,7 +42,7 @@ any = AnyType("*")
 def parse_string_to_list(s):
     elements = s.split(',')
     result = []
-"""Stolen from https://github.com/cubiq/ComfyUI_essentials"""
+    """Stolen from https://github.com/cubiq/ComfyUI_essentials"""
     def parse_number(s):
         try:
             if '.' in s:

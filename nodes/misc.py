@@ -86,7 +86,7 @@ class LoraFluxParams:
         return {
             "required": {
                 "lora_1": (folder_paths.get_filename_list("loras"), {"tooltip": "The name of the LoRA."}),
-                "strength_model_1": ("STRING", { "multiline": False, "dynamicPrompts": False, "default": "1.0" }),
+                "strength_lora_1": ("STRING", { "multiline": False, "dynamicPrompts": False, "default": "1.0" }),
             },
             "optional": {
                 "lora_2": (optional_loras, ),
@@ -95,6 +95,12 @@ class LoraFluxParams:
                 "strength_lora_3": ("STRING", { "multiline": False, "dynamicPrompts": False }),
                 "lora_4": (optional_loras, ),
                 "strength_lora_4": ("STRING", { "multiline": False, "dynamicPrompts": False }),
+                "lora_5": (optional_loras, ),
+                "strength_lora_5": ("STRING", { "multiline": False, "dynamicPrompts": False }),
+                "lora_6": (optional_loras, ),
+                "strength_lora_6": ("STRING", { "multiline": False, "dynamicPrompts": False }),
+                "lora_7": (optional_loras, ),
+                "strength_lora_7": ("STRING", { "multiline": False, "dynamicPrompts": False }),
             }
         }
 
@@ -102,10 +108,10 @@ class LoraFluxParams:
     FUNCTION = "execute"
     CATEGORY = CATEGORY.MAIN.value + CATEGORY.SAMPLING.value
 
-    def execute(self, lora_1, strength_model_1, lora_2="none", strength_lora_2="", lora_3="none", strength_lora_3="", lora_4="none", strength_lora_4=""):
+    def execute(self, lora_1, strength_lora_1, lora_2="none", strength_lora_2="", lora_3="none", strength_lora_3="", lora_4="none", strength_lora_4="", lora_5="none", strength_lora_5="", lora_6="none", strength_lora_6="", lora_7="none", strength_lora_7=""):
         output = { "loras": [], "strengths": [] }
         output["loras"].append(lora_1)
-        output["strengths"].append(parse_string_to_list(strength_model_1))
+        output["strengths"].append(parse_string_to_list(strength_lora_1))
 
         if lora_2 != "none":
             output["loras"].append(lora_2)
@@ -122,5 +128,20 @@ class LoraFluxParams:
             if strength_lora_4 == "":
                 strength_lora_4 = "1.0"
             output["strengths"].append(parse_string_to_list(strength_lora_4))
+        if lora_5 != "none":
+            output["loras"].append(lora_5)
+            if strength_lora_5 == "":
+                strength_lora_5 = "1.0"
+            output["strengths"].append(parse_string_to_list(strength_lora_5))
+        if lora_6 != "none":
+            output["loras"].append(lora_6)
+            if strength_lora_6 == "":
+                strength_lora_6 = "1.0"
+            output["strengths"].append(parse_string_to_list(strength_lora_6))
+        if lora_7 != "none":
+            output["loras"].append(lora_7)
+            if strength_lora_7 == "":
+                strength_lora_7 = "1.0"
+            output["strengths"].append(parse_string_to_list(strength_lora_7))
 
         return (output,)
