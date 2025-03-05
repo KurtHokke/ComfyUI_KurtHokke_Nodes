@@ -35,11 +35,25 @@ class CLASSES(Enum):
     LOADUNETANDCLIP_DESC = prefix + 'LoadUnetAndClip'
     UNETCLIPLORALOADER_NAME = 'UnetClipLoraLoader'
     UNETCLIPLORALOADER_DESC = prefix + 'UnetClipLoraLoader'
+    UNETCLIPLORALOADERBASIC_NAME = 'UnetClipLoraLoaderBasic'
+    UNETCLIPLORALOADERBASIC_DESC = prefix + 'UnetClipLoraLoaderBasic'
+    LORAHOOKSCHEDULERBASIC_NAME = 'LoraHookSchedulerBasic'
+    LORAHOOKSCHEDULERBASIC_DESC = prefix + 'LoraHookSchedulerBasic'
+    CKPTPIPE_NAME = 'CkptPipe'
+    CKPTPIPE_DESC = prefix + 'CkptPipe'
+    MODELPIPE1_NAME = '>ModelPipe'
+    MODELPIPE1_DESC = prefix + '>ModelPipe'
+    MODELPIPE2_NAME = '<ModelPipe'
+    MODELPIPE2_DESC = prefix + '<ModelPipe'
+#    MODELPIPEHOOKS_NAME = 'ModelPipeHooks'
+#    MODELPIPEHOOKS_DESC = prefix + 'ModelPipeHooks'
+
 
 class CATEGORY(Enum):
   MAIN = "🛸KurtHokke"
   UTILS = "/Utils"
   MATH = "/Math"
-  MISC = "/Misc"
-  SAMPLING = "/Sampling"
   LOADERS = "/Loaders"
+  PATCH = "/Patch"
+  SAMPLING = "/Sampling"
+  MISC = "/Misc"

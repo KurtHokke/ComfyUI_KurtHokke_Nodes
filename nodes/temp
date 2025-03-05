@@ -1,0 +1,120 @@
+class CreateHookLora:
+    NodeId = 'CreateHookLora'
+    NodeName = 'Create Hook LoRA'
+    def __init__(self):
+        self.loaded_lora = None
+
+    @classmethod
+    def INPUT_TYPES(s):
+        return {
+            "required": {
+                "lora_name": (folder_paths.get_filename_list("loras"), ),
+                "strength_model": ("FLOAT", {"default": 1.0, "min": -20.0, "max": 20.0, "step": 0.01}),
+                "strength_clip": ("FLOAT", {"default": 1.0, "min": -20.0, "max": 20.0, "step": 0.01}),
+            },
+            "optional": {
+                "prev_hooks": ("HOOKS",)
+            }
+        }
+
+    EXPERIMENTAL = True
+    RETURN_TYPES = ("HOOKS",)
+    CATEGORY = "advanced/hooks/create"
+    FUNCTION = "create_hook"
+
+    def create_hook(self, lora_name: str, strength_model: float, strength_clip: float, prev_hooks: comfy.hooks.HookGroup=None):
+        if prev_hooks is None:
+            prev_hooks = comfy.hooks.HookGroup()
+        prev_hooks.clone()
+
+        if strength_model == 0 and strength_clip == 0:
+            return (prev_hooks,)
+
+        lora_path = folder_paths.get_full_path("loras", lora_name)
+        lora = None
+        if self.loaded_lora is not None:
+            if self.loaded_lora[0] == lora_path:
+                lora = self.loaded_lora[1]
+            else:
+                temp = self.loaded_lora
+                self.loaded_lora = None
+                del temp
+
+        if lora is None:
+            lora = comfy.utils.load_torch_file(lora_path, safe_load=True)
+            self.loaded_lora = (lora_path, lora)
+
+        hooks = comfy.hooks.create_hook_lora(lora=lora, strength_model=strength_model, strength_clip=strength_clip)
+        return (prev_hooks.clone_and_combine(hooks),)
+class SetHookKeyframes:
+    NodeId = 'SetHookKeyframes'
+    NodeName = 'Set Hook Keyframes'
+    @classmethod
+    def INPUT_TYPES(s):
+        return {
+            "required": {
+                "hooks": ("HOOKS",),
+            },
+            "optional": {
+                "hook_kf": ("HOOK_KEYFRAMES",),
+            }
+        }
+
+    EXPERIMENTAL = True
+    RETURN_TYPES = ("HOOKS",)
+    CATEGORY = "advanced/hooks/scheduling"
+    FUNCTION = "set_hook_keyframes"
+
+    def set_hook_keyframes(self, hooks: comfy.hooks.HookGroup, hook_kf: comfy.hooks.HookKeyframeGroup=None):
+        if hook_kf is not None:
+            hooks = hooks.clone()
+            hooks.set_keyframes_on_hooks(hook_kf=hook_kf)
+        return (hooks,)
+
+        
+class CreateHookKeyframesInterpolated:
+    NodeId = 'CreateHookKeyframesInterpolated'
+    NodeName = 'Create Hook Keyframes Interp.'
+    @classmethod
+    def INPUT_TYPES(s):
+        return {
+            "required": {
+                "strength_start": ("FLOAT", {"default": 1.0, "min": 0.0, "max": 10.0, "step": 0.001}, ),
+                "strength_end": ("FLOAT", {"default": 1.0, "min": 0.0, "max": 10.0, "step": 0.001}, ),
+                "interpolation": (comfy.hooks.InterpolationMethod._LIST, ),
+                "start_percent": ("FLOAT", {"default": 0.0, "min": 0.0, "max": 1.0, "step": 0.001}),
+                "end_percent": ("FLOAT", {"default": 1.0, "min": 0.0, "max": 1.0, "step": 0.001}),
+                "keyframes_count": ("INT", {"default": 5, "min": 2, "max": 100, "step": 1}),
+                "print_keyframes": ("BOOLEAN", {"default": False}),
+            },
+            "optional": {
+                "prev_hook_kf": ("HOOK_KEYFRAMES",),
+            },
+        }
+
+    EXPERIMENTAL = True
+    RETURN_TYPES = ("HOOK_KEYFRAMES",)
+    RETURN_NAMES = ("HOOK_KF",)
+    CATEGORY = "advanced/hooks/scheduling"
+    FUNCTION = "create_hook_keyframes"
+
+    def create_hook_keyframes(self, strength_start: float, strength_end: float, interpolation: str,
+                              start_percent: float, end_percent: float, keyframes_count: int,
+                              print_keyframes=False, prev_hook_kf: comfy.hooks.HookKeyframeGroup=None):
+        if prev_hook_kf is None:
+            prev_hook_kf = comfy.hooks.HookKeyframeGroup()
+        prev_hook_kf = prev_hook_kf.clone()
+        percents = comfy.hooks.InterpolationMethod.get_weights(num_from=start_percent, num_to=end_percent, length=keyframes_count,
+                                                               method=comfy.hooks.InterpolationMethod.LINEAR)
+        strengths = comfy.hooks.InterpolationMethod.get_weights(num_from=strength_start, num_to=strength_end, length=keyframes_count, method=interpolation)
+
+        is_first = True
+        for percent, strength in zip(percents, strengths):
+            guarantee_steps = 0
+            if is_first:
+                guarantee_steps = 1
+                is_first = False
+            prev_hook_kf.add(comfy.hooks.HookKeyframe(strength=strength, start_percent=percent, guarantee_steps=guarantee_steps))
+            if print_keyframes:
+                logging.info(f"Hook Keyframe - start_percent:{percent} = {strength}")
+        return (prev_hook_kf,)

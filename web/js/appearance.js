@@ -11,6 +11,10 @@ app.registerExtension({
                     node.color = "#3f2b75";
                     node.bgcolor = "#6233b8";
                     break;
+                case "UnetClipLoraLoaderBasic":
+                    node.color = "#3f2b75";
+                    node.bgcolor = "#6233b8";
+                    break;
                 case "SamplerSel":
                     node.setSize([250, 58]);
                     node.color = "#a31d4c";
@@ -26,6 +30,21 @@ app.registerExtension({
                     break;
                 case "EmptyLatentSize64":
                     node.setSize([160, 117]);
+                    break;
+                case "CkptPipe":
+                    node.setSize([285, 68]);
+                    node.color = "#583585";
+                    node.bgcolor = "#4d2c78";
+                    break;
+                case ">ModelPipe":
+                    node.setSize([140, 62]);
+                    node.color = "#174091";
+                    node.bgcolor = "#003194";
+                    break;
+                case "<ModelPipe":
+                    node.setSize([140, 62]);
+                    node.color = "#174091";
+                    node.bgcolor = "#003194";
                     break;
             }
         }
