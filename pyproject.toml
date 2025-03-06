@@ -1,0 +1,15 @@
+[project]
+name = "ComfyUI_KurtHokke-Nodes"
+description = ""
+version = "1.0.0"
+license = {file = "LICENSE"}
+dependencies = ["math"]
+
+[project.urls]
+Repository = "https://github.com/KurtHokke/ComfyUI_KurtHokke-Nodes"
+#  Used by Comfy Registry https://comfyregistry.org
+
+[tool.comfy]
+PublisherId = "kurthokke"
+DisplayName = "ComfyUI_KurtHokke-Nodes"
+Icon = ""
