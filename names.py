@@ -37,23 +37,35 @@ class CLASSES(Enum):
     UNETCLIPLORALOADER_DESC = prefix + 'UnetClipLoraLoader'
     UNETCLIPLORALOADERBASIC_NAME = 'UnetClipLoraLoaderBasic'
     UNETCLIPLORALOADERBASIC_DESC = prefix + 'UnetClipLoraLoaderBasic'
-    LORAHOOKSCHEDULERBASIC_NAME = 'LoraHookSchedulerBasic'
-    LORAHOOKSCHEDULERBASIC_DESC = prefix + 'LoraHookSchedulerBasic'
     CKPTPIPE_NAME = 'CkptPipe'
     CKPTPIPE_DESC = prefix + 'CkptPipe'
     MODELPIPE1_NAME = '>ModelPipe'
     MODELPIPE1_DESC = prefix + '>ModelPipe'
     MODELPIPE2_NAME = '<ModelPipe'
     MODELPIPE2_DESC = prefix + '<ModelPipe'
-#    MODELPIPEHOOKS_NAME = 'ModelPipeHooks'
-#    MODELPIPEHOOKS_DESC = prefix + 'ModelPipeHooks'
+    BASICADVSCHEDULER_NAME = 'BasicAdvScheduler'
+    BASICADVSCHEDULER_DESC = prefix + 'BasicAdvScheduler'
+    BETA_CONFIG_NAME = 'S_BetaConfig'
+    BETA_CONFIG_DESC = prefix + 'S_BetaConfig'
+    LMS_CONFIG_NAME = 'LMS_Config'
+    LMS_CONFIG_DESC = prefix + 'LMS_Config'
+    AIO_TUNER_NAME = 'AIO_Tuner'
+    AIO_TUNER_DESC = prefix + 'AIO_Tuner'
+    AIO_TUNER_PIPE_NAME = 'AIO_Tuner_Pipe'
+    AIO_TUNER_PIPE_DESC = prefix + 'AIO_Tuner_Pipe'
+    SAMPLERCUSTOMADVANCED_PIPE_NAME = 'SamplerCustomAdvanced_Pipe'
+    SAMPLERCUSTOMADVANCED_PIPE_DESC = prefix + 'SamplerCustomAdvanced_Pipe'
+    
 
 
 class CATEGORY(Enum):
-  MAIN = "🛸KurtHokke"
-  UTILS = "/Utils"
-  MATH = "/Math"
-  LOADERS = "/Loaders"
-  PATCH = "/Patch"
-  SAMPLING = "/Sampling"
-  MISC = "/Misc"
+    MAIN = "🛸KurtHokke"
+    UTILS = "/Utils"
+    MATH = "/Math"
+    LOADERS = "/Loaders"
+    PATCH = "/Patch"
+    SAMPLING = "/Sampling"
+    MISC = "/Misc"
+    TUNING = "/Tuning"
+
+MODEL_TYPES = ["FLUX", "SDXL"]
