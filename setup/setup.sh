@@ -19,6 +19,7 @@ custom_node_array=(
 "VykosX/ControlFlowUtils"
 "pythongosssss/ComfyUI-Custom-Scripts"
 "rgthree/rgthree-comfy"
+"mcmonkeyprojects/sd-dynamic-thresholding"
 )
 
 for line in "${custom_node_array[@]}"; do

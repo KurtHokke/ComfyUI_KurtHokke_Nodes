@@ -1,5 +1,5 @@
 # Byte-compiled / optimized / DLL files
-lnk/
+shed/
 nodes/temp
 __pycache__/
 *.py[cod]
