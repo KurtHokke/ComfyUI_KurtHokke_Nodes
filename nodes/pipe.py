@@ -6,35 +6,11 @@ https://github.com/cubiq/ComfyUI_essentials
 '''
 from ..utils import any, BOOLEAN, INT, FLOAT, STRING
 from ..names import CATEGORY
-from comfy_extras.nodes_custom_sampler import SamplerCustomAdvanced
 import math
 import torch
 import time
 
 
-class SamplerCustomAdvanced_Pipe:
-    @classmethod
-    def INPUT_TYPES(s):
-        return {
-            "required": {
-                "SCA_PIPE": (any, ),
-            }
-        }
-
-    RETURN_TYPES = ("LATENT")
-    RETURN_NAMES = ("denoised_output")
-
-    FUNCTION = "get_sample"
-
-    CATEGORY = CATEGORY.MAIN.value + CATEGORY.UTILS.value
-
-    def get_sample(self, SCA_PIPE=None):
-        get_SamplerCustomAdvanced = SamplerCustomAdvanced()
-
-        noise, guider, sampler, sigmas, latent = SCA_PIPE
-        out_denoised = get_SamplerCustomAdvanced.sample(noise, guider, sampler, sigmas, latent_image=latent)
-
-        return (out_denoised,)
 
 
 class BooleanToPipe:

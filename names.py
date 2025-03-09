@@ -55,6 +55,8 @@ class CLASSES(Enum):
     AIO_TUNER_PIPE_DESC = prefix + 'AIO_Tuner_Pipe'
     SAMPLERCUSTOMADVANCED_PIPE_NAME = 'SamplerCustomAdvanced_Pipe'
     SAMPLERCUSTOMADVANCED_PIPE_DESC = prefix + 'SamplerCustomAdvanced_Pipe'
+    STOPIPE_NAME = 'stopipe'
+    STOPIPE_DESC = prefix + 'stopipe'
     
 
 

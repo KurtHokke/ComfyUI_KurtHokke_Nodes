@@ -3,12 +3,78 @@ from ..names import CATEGORY, MODEL_TYPES
 import node_helpers
 import comfy.samplers
 from nodes import EmptyLatentImage, MAX_RESOLUTION
-from comfy_extras.nodes_custom_sampler import RandomNoise, Noise_RandomNoise, BasicGuider, CFGGuider
+from comfy_extras.nodes_custom_sampler import RandomNoise, Noise_RandomNoise, BasicGuider, CFGGuider, SamplerCustomAdvanced
 from comfy_extras.nodes_custom_sampler import BasicScheduler, BetaSamplingScheduler
 from comfy_extras.nodes_custom_sampler import KSamplerSelect, SamplerLMS
 from comfy_extras.nodes_sd3 import EmptySD3LatentImage
 from comfy_extras.nodes_flux import FluxGuidance
 import torch
+
+class SamplerCustomAdvanced_Pipe:
+    def __init__(self):
+        pass
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "SCA_PIPE": (any, ),
+            }
+        }
+
+    RETURN_TYPES = ("LATENT","LATENT")
+    RETURN_NAMES = ("output", "denoised_output")
+
+    FUNCTION = "get_sample"
+
+    CATEGORY = CATEGORY.MAIN.value + CATEGORY.TUNING.value
+
+    def get_sample(self, SCA_PIPE=None):
+
+        noise, guider, sampler, sigmas, latent = SCA_PIPE
+
+        get_SamplerCustomAdvanced = SamplerCustomAdvanced()
+
+        out = get_SamplerCustomAdvanced.sample(noise, guider, sampler, sigmas, latent_image=latent)
+        out_denoised = out[1]
+        out = out[0]
+
+        return (out, out_denoised)
+
+
+class stopipe:
+    def __init__(self):
+        pass
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "noise": ("NOISE", ),
+                "guider": ("GUIDER", ),
+                "sampler": ("SAMPLER", ),
+                "sigmas": ("SIGMAS", ),
+                "latent_image": ("LATENT", ),
+            }
+        }
+
+    CATEGORY = CATEGORY.MAIN.value + CATEGORY.UTILS.value
+    RETURN_TYPES = (any,)
+
+    FUNCTION = "execute"
+
+    def execute(self, noise, guider, sampler, sigmas, latent_image):
+
+        SCA_PIPE = []
+
+        SCA_PIPE.append(noise)
+        SCA_PIPE.append(guider)
+        SCA_PIPE.append(sampler)
+        SCA_PIPE.append(sigmas)
+        SCA_PIPE.append(latent_image)
+
+        return (SCA_PIPE,)
+
 
 class AIO_Tuner:
 
@@ -124,6 +190,8 @@ class AIO_Tuner:
 
         latent = self.get_latent(model_type, width=width, height=height, batch_size=1)[0]
 
+
+
         return(noise, guider, sampler, sigmas, latent)
 
 
@@ -154,7 +222,7 @@ class AIO_Tuner_Pipe:
                 "Sampler_config": (any, ),
             }
         }
-    RETURN_TYPES = ("SCA_PIPE")
+    RETURN_TYPES = (any,)
     CATEGORY = CATEGORY.MAIN.value + CATEGORY.TUNING.value
 
     FUNCTION = "determine_pipe_settings"
@@ -170,7 +238,7 @@ class AIO_Tuner_Pipe:
 
 
     def determine_pipe_settings(self, model, positive, model_type, guidance, sampler, scheduler, steps, denoise, 
-                           width, height, noise_seed, negative=None, Scheduler_config=None, Sampler_config=None):
+                                width, height, noise_seed, negative=None, Scheduler_config=None, Sampler_config=None):
         #get_Noise_RandomNoise = Noise_RandomNoise()
         get_FluxGuidance = FluxGuidance()
         get_BasicGuider = BasicGuider()
@@ -241,13 +309,15 @@ class AIO_Tuner_Pipe:
 
         latent = self.get_latent(model_type, width=width, height=height, batch_size=1)[0]
 
+        SCA_PIPE = []
+
         SCA_PIPE.append(noise)
         SCA_PIPE.append(guider)
         SCA_PIPE.append(sampler)
         SCA_PIPE.append(sigmas)
         SCA_PIPE.append(latent)
 
-        return(SCA_PIPE,)
+        return (SCA_PIPE,)
 
 
 class LMS_Config:

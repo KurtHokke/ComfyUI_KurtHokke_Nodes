@@ -5,11 +5,11 @@ https://github.com/cubiq/ComfyUI_essentials
   Many thanks goes to these awesome developers!
 '''
 from .names import CLASSES
-from .nodes.pipe import BooleanToPipe, BooleanFromPipe, SamplerCustomAdvanced_Pipe
+from .nodes.pipe import BooleanToPipe, BooleanFromPipe
 from .nodes.math import ExpMath, ExpMathDual, ExpMathQuad
 from .nodes.misc import EmptyLatentSize, EmptyLatentSize64, SchedulerSel, SamplerSel, LoraFluxParams
 from .nodes.models import LoadUnetAndClip, UnetClipLoraLoader, UnetClipLoraLoaderBasic, CkptPipe, ModelPipe1, ModelPipe2
-from .nodes.tuning import AIO_Tuner, AIO_Tuner_Pipe, Beta_Config, LMS_Config, BasicAdvScheduler
+from .nodes.tuning import SamplerCustomAdvanced_Pipe, AIO_Tuner, AIO_Tuner_Pipe, Beta_Config, LMS_Config, BasicAdvScheduler, stopipe
 #from .nodes.models import LoadUnetAndClip, UnetClipLoraLoader, UnetClipLoraLoaderBasic, CkptPipe, ModelPipe1, ModelPipe2, LoraHookSchedulerBasic, ModelPipeHooks
 
 
@@ -37,6 +37,7 @@ NODE_CLASS_MAPPINGS = {
   CLASSES.BETA_CONFIG_NAME.value: Beta_Config,
   CLASSES.LMS_CONFIG_NAME.value: LMS_Config,
   CLASSES.BASICADVSCHEDULER_NAME.value: BasicAdvScheduler,
+  CLASSES.STOPIPE_NAME.value: stopipe,
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
@@ -62,6 +63,7 @@ NODE_DISPLAY_NAME_MAPPINGS = {
   CLASSES.BETA_CONFIG_NAME.value: CLASSES.BETA_CONFIG_DESC.value,
   CLASSES.LMS_CONFIG_NAME.value: CLASSES.LMS_CONFIG_DESC.value,
   CLASSES.BASICADVSCHEDULER_NAME.value: CLASSES.BASICADVSCHEDULER_DESC.value,
+  CLASSES.STOPIPE_NAME.value: CLASSES.STOPIPE_DESC.value,
 }
 
 __all__ = ["NODE_CLASS_MAPPINGS", "NODE_DISPLAY_NAME_MAPPINGS", "WEB_DIRECTORY"]

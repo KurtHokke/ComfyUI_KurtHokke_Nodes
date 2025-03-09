@@ -17,7 +17,6 @@ import folder_paths
 if TYPE_CHECKING:
     from comfy.sd import CLIP
 
-
 class LoadUnetAndClip:
     @classmethod
     def INPUT_TYPES(s):
