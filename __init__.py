@@ -11,6 +11,7 @@ from .nodes.misc import EmptyLatentSize, EmptyLatentSize64, SchedulerSel, Sample
 from .nodes.models import LoadUnetAndClip, UnetClipLoraLoader, UnetClipLoraLoaderBasic, CkptPipe, ModelPipe1, ModelPipe2
 from .nodes.tuning import SamplerCustomAdvanced_Pipe, AIO_Tuner, AIO_Tuner_Pipe, Beta_Config, LMS_Config, BasicAdvScheduler, stopipe
 from .nodes.custom_nodes__sd_dynamic_thresholding import DynamicThresholding, DynamicThresholdingBasic
+from .nodes.cond import CLIPTextEncode_Pipe
 #from .nodes.models import LoadUnetAndClip, UnetClipLoraLoader, UnetClipLoraLoaderBasic, CkptPipe, ModelPipe1, ModelPipe2, LoraHookSchedulerBasic, ModelPipeHooks
 
 
@@ -41,6 +42,7 @@ NODE_CLASS_MAPPINGS = {
     "stopipe": stopipe,
     "DynamicThresholding": DynamicThresholding,
     "DynamicThresholdingBasic": DynamicThresholdingBasic,
+    "CLIPTextEncode_Pipe": CLIPTextEncode_Pipe,
 }
 
 prefix = '🛸 '
@@ -70,6 +72,7 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "stopipe": prefix + "stopipe",
     "DynamicThresholding": prefix + "DynamicThresholding",
     "DynamicThresholdingBasic": prefix + "DynamicThresholdingBasic",
+    "CLIPTextEncode_Pipe": prefix + "CLIPTextEncode_Pipe"
 }
 
 __all__ = ["NODE_CLASS_MAPPINGS", "NODE_DISPLAY_NAME_MAPPINGS", "WEB_DIRECTORY"]

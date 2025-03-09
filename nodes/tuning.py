@@ -9,36 +9,7 @@ from comfy_extras.nodes_sd3 import EmptySD3LatentImage
 from comfy_extras.nodes_flux import FluxGuidance
 import torch
 
-class SamplerCustomAdvanced_Pipe:
-    def __init__(self):
-        pass
 
-    @classmethod
-    def INPUT_TYPES(cls):
-        return {
-            "required": {
-                "SCA_PIPE": ("SCA_PIPE", ),
-            }
-        }
-
-    RETURN_TYPES = ("LATENT", )
-    RETURN_NAMES = ("denoised_output", )
-
-    FUNCTION = "get_sample"
-
-    CATEGORY = CATEGORY.MAIN.value + "/Advanced"
-
-    def get_sample(self, SCA_PIPE=None):
-
-        noise, guider, sampler, sigmas, latent = SCA_PIPE
-
-        get_SamplerCustomAdvanced = SamplerCustomAdvanced()
-
-        out = get_SamplerCustomAdvanced.sample(noise, guider, sampler, sigmas, latent_image=latent)
-        out_denoised = out[1]
-        out = out[0]
-
-        return (out_denoised, )
 
 
 class stopipe:
@@ -210,7 +181,8 @@ class AIO_Tuner_Pipe:
                 "sampler": (comfy.samplers.SAMPLER_NAMES, ),
                 "scheduler": (comfy.samplers.SCHEDULER_NAMES, ),
                 "steps": ("INT", {"default": 20, "min": 1, "max": 10000}),
-                "denoise": ("FLOAT", {"default": 1.0, "min": 0.0, "max": 1.0, "step": 0.001}),
+                #"denoise": ("FLOAT", {"default": 1.0, "min": 0.0, "max": 1.0, "step": 0.001}),
+                "denoise": ("STRING", {"default": "0.5,0.25"}),
                 "width": ("INT", {"default": 1024, "min": 16, "max": MAX_RESOLUTION, "step": 16}),
                 "height": ("INT", {"default": 1024, "min": 16, "max": MAX_RESOLUTION, "step": 16}),
                 "noise_seed": ("INT", {"default": 0, "min": 0, "max": 0xffffffffffffffff}),
@@ -238,7 +210,6 @@ class AIO_Tuner_Pipe:
 
     def determine_pipe_settings(self, model, positive, model_type, guidance, sampler, scheduler, steps, denoise, 
                                 width, height, noise_seed, negative=None, Scheduler_config=None, Sampler_config=None):
-        #get_Noise_RandomNoise = Noise_RandomNoise()
         get_FluxGuidance = FluxGuidance()
         get_BasicGuider = BasicGuider()
         get_CFGGuider = CFGGuider()
@@ -248,7 +219,16 @@ class AIO_Tuner_Pipe:
         get_EmptyLatentImage = EmptyLatentImage()
         get_EmptySD3LatentImage = EmptySD3LatentImage()
 
-        noise = Noise_RandomNoise(noise_seed)
+        SCA_PIPE = []
+
+        if ',' not in denoise:
+            float_denoise = float(denoise)
+            noise = Noise_RandomNoise(noise_seed)
+
+            SCA_PIPE.append(noise)
+        else:
+            SCA_PIPE.append(noise_seed)
+
 
         if model_type == "FLUX":
             if negative is None:
@@ -258,7 +238,6 @@ class AIO_Tuner_Pipe:
                 positive = get_FluxGuidance.append(conditioning=positive, guidance=guidance)
                 negative = get_FluxGuidance.append(conditioning=negative, guidance=guidance)
                 guider = get_CFGGuider.get_guider(model=model, positive=positive, negative=negative, cfg=1)[0]
-        
         elif model_type == "SDXL":
             if negative is None:
                 guider = get_BasicGuider.get_guider(model=model, conditioning=positive)[0]
@@ -269,11 +248,15 @@ class AIO_Tuner_Pipe:
                 guider = get_BasicGuider.get_guider(model=model, conditioning=positive)[0]
             else:
                 guider = get_CFGGuider.get_guider(model=model, positive=positive, negative=negative, cfg=guidance)[0]
+        
+        SCA_PIPE.append(guider)
 
+        
         if Sampler_config is not None:
             if Sampler_config[0] == "LMS":
                 SAMPLER, order = Sampler_config
-                sampler = get_SamplerLMS.get_sampler(order=order)
+                sampler = get_SamplerLMS.get_sampler(order=order)[0]
+                print(f"SAMPLER: {sampler}")
             else:
                 SAMPLER, *SAMPLER_opts = Sampler_config
                 sampler = comfy.samplers.sampler_object(sampler)
@@ -287,36 +270,103 @@ class AIO_Tuner_Pipe:
                 print(f"!!!!! Using {sampler} instead !!!!!")
         else:
             sampler = comfy.samplers.sampler_object(sampler)
+
+        SCA_PIPE.append(sampler)
         
-        if Scheduler_config is not None:
-            if Scheduler_config[0] == "BETA":
-                SCHEDULER, alpha, beta = Scheduler_config 
-                sigmas = get_BetaSamplingScheduler.get_sigmas(model=model, steps=steps, alpha=alpha, beta=beta)[0]
-            else:
-                SCHEDULER, *SCHEDULER_opts = Scheduler_config
-                sigmas = get_BasicScheduler.get_sigmas(model=model, scheduler=scheduler, steps=steps, denoise=denoise)[0]
-                if len(SCHEDULER_opts) == 1:
-                    print(f"!!!!! Sampler_config got unexpected input: {SCHEDULER}, {SCHEDULER_opts[0]} !!!!!")
-                elif len(SCHEDULER_opts) > 1:
-                    SCHEDULER_opts_str = ', '.join(map(str, SCHEDULER_opts))
-                    print(f"!!!!! Sampler_config got unexpected input: {SCHEDULER}, {SCHEDULER_opts_str} !!!!!")
+
+        if ',' not in denoise:
+            if Scheduler_config is not None:
+                if Scheduler_config[0] == "BETA":
+                    SCHEDULER, alpha, beta = Scheduler_config 
+                    sigmas = get_BetaSamplingScheduler.get_sigmas(model=model, steps=steps, alpha=alpha, beta=beta)[0]
                 else:
-                    print(f"!!!!! Sampler_config got unexpected input: {SCHEDULER} !!!!!")
-                print(f"!!!!! Using {scheduler} instead !!!!!")
+                    SCHEDULER, *SCHEDULER_opts = Scheduler_config
+                    sigmas = get_BasicScheduler.get_sigmas(model=model, scheduler=scheduler, steps=steps, denoise=float_denoise)[0]
+                    if len(SCHEDULER_opts) == 1:
+                        print(f"!!!!! Sampler_config got unexpected input: {SCHEDULER}, {SCHEDULER_opts[0]} !!!!!")
+                    elif len(SCHEDULER_opts) > 1:
+                        SCHEDULER_opts_str = ', '.join(map(str, SCHEDULER_opts))
+                        print(f"!!!!! Sampler_config got unexpected input: {SCHEDULER}, {SCHEDULER_opts_str} !!!!!")
+                    else:
+                        print(f"!!!!! Sampler_config got unexpected input: {SCHEDULER} !!!!!")
+                    print(f"!!!!! Using {scheduler} instead !!!!!")
+            else:
+                sigmas = get_BasicScheduler.get_sigmas(model=model, scheduler=scheduler, steps=steps, denoise=float_denoise)[0]
+
+            SCA_PIPE.append(sigmas)
         else:
-            sigmas = get_BasicScheduler.get_sigmas(model=model, scheduler=scheduler, steps=steps, denoise=denoise)[0]
+            SCA_PIPE.append(scheduler)
+
 
         latent = self.get_latent(model_type, width=width, height=height, batch_size=1)[0]
 
-        SCA_PIPE = []
-
-        SCA_PIPE.append(noise)
-        SCA_PIPE.append(guider)
-        SCA_PIPE.append(sampler)
-        SCA_PIPE.append(sigmas)
         SCA_PIPE.append(latent)
 
+        
+        if ',' in denoise:
+            SCA_PIPE.append(model)
+            SCA_PIPE.append(denoise)
+            SCA_PIPE.append(steps)
+        
         return (SCA_PIPE, )
+
+
+class SamplerCustomAdvanced_Pipe:
+    def __init__(self):
+        pass
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "SCA_PIPE": ("SCA_PIPE", ),
+            }
+        }
+
+    RETURN_TYPES = ("LATENT", )
+    RETURN_NAMES = ("denoised_output", )
+
+    FUNCTION = "get_sample"
+
+    CATEGORY = CATEGORY.MAIN.value + "/Advanced"
+
+    def get_sample(self, SCA_PIPE=None):
+
+        #get_BasicGuider = BasicGuider()
+        
+        get_SamplerCustomAdvanced = SamplerCustomAdvanced()
+
+        if len(SCA_PIPE) == 5:
+            noise, guider, sampler, sigmas, latent = SCA_PIPE
+            out = get_SamplerCustomAdvanced.sample(noise, guider, sampler, sigmas, latent)
+            out_denoised = out[1]
+            out = out[0]
+            return(out_denoised, )
+        elif len(SCA_PIPE) == 8:
+            noise_seed, guider, sampler, scheduler, latent, model, denoise_schedule, steps = SCA_PIPE
+            get_BasicScheduler = BasicScheduler()
+            
+            '''Thanks to https://github.com/syaofox/ComfyUI_fnodes'''
+            denoise_values = [float(x.strip()) for x in denoise_schedule.split(',')]
+            mask = latent.get('noise_mask', None)
+            for i, denoise_value in enumerate(denoise_values):
+                current_noise_seed = Noise_RandomNoise(noise_seed + i)
+                current_steps = round(steps * denoise_value)
+                current_sigmas = get_BasicScheduler.get_sigmas(model=model, scheduler=scheduler, steps=current_steps, denoise=denoise_value)[0]
+
+                latent['noise_mask'] = mask
+                out = get_SamplerCustomAdvanced.sample(current_noise_seed, guider, sampler, current_sigmas, latent)
+                latent = out[0]
+
+                out_denoised = out[1]
+                out = out[0]
+
+            return (out_denoised, )
+
+            
+
+        
+        
 
 
 class LMS_Config:
@@ -334,7 +384,10 @@ class LMS_Config:
 
     def get_LMS_Config(self, order):
         SAMPLER = "LMS"
-        Sampler_config.append(LMS)
+
+        Sampler_config = []
+
+        Sampler_config.append(SAMPLER)
         Sampler_config.append(order)
         #sampler = comfy.samplers.ksampler("lms", {"order": order})
         return (Sampler_config, )
@@ -355,7 +408,10 @@ class Beta_Config:
 
     def get_Beta_Config(self, alpha, beta):
         SCHEDULER = "BETA"
-        Scheduler_config.append(BETA)
+
+        Scheduler_config = []
+
+        Scheduler_config.append(SCHEDULER)
         Scheduler_config.append(alpha)
         Scheduler_config.append(beta)
         return(Scheduler_config, )

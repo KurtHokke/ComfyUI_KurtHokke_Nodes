@@ -20,7 +20,7 @@ class DynamicThresholding:
     def INPUT_TYPES(s):
         return {
             "required": {
-                "model": ("MODEL",),
+                "UnetClipPipe": ("UnetClipPipe",),
                 "mimic_scale": ("FLOAT", {"default": 7.0, "min": 0.0, "max": 100.0, "step": 0.01}),
                 "threshold_percentile": ("FLOAT", {"default": 1.0, "min": 0.0, "max": 1.0, "step": 0.01}),
                 "mimic_mode": (DynThresh.Modes, ),
@@ -39,7 +39,9 @@ class DynamicThresholding:
     FUNCTION = "patch"
     CATEGORY = CATEGORY.MAIN.value + "/Advanced"
 
-    def patch(self, model, mimic_scale, threshold_percentile, mimic_mode, mimic_scale_min, cfg_mode, cfg_scale_min, sched_val, separate_feature_channels, scaling_startpoint, variability_measure, interpolate_phi):
+    def patch(self, UnetClipPipe, mimic_scale, threshold_percentile, mimic_mode, mimic_scale_min, cfg_mode, cfg_scale_min, sched_val, separate_feature_channels, scaling_startpoint, variability_measure, interpolate_phi):
+
+        model, clip = UnetClipPipe
 
         dynamic_thresh = DynThresh(mimic_scale, threshold_percentile, mimic_mode, mimic_scale_min, cfg_mode, cfg_scale_min, sched_val, 0, 999, separate_feature_channels == "enable", scaling_startpoint, variability_measure, interpolate_phi)
         
@@ -67,7 +69,7 @@ class DynamicThresholdingBasic:
     def INPUT_TYPES(s):
         return {
             "required": {
-                "model": ("MODEL",),
+                "UnetClipPipe": ("UnetClipPipe",),
                 "mimic_scale": ("FLOAT", {"default": 7.0, "min": 0.0, "max": 100.0, "step": 0.01}),
                 "threshold_percentile": ("FLOAT", {"default": 1.0, "min": 0.0, "max": 1.0, "step": 0.01}),
                 }
@@ -77,7 +79,9 @@ class DynamicThresholdingBasic:
     FUNCTION = "patch"
     CATEGORY = CATEGORY.MAIN.value + "/Advanced"
 
-    def patch(self, model, mimic_scale, threshold_percentile):
+    def patch(self, UnetClipPipe, mimic_scale, threshold_percentile):
+
+        model, clip = UnetClipPipe
 
         dynamic_thresh = DynThresh(mimic_scale, threshold_percentile, "CONSTANT", 0, "CONSTANT", 0, 0, 0, 999, False, "MEAN", "AD", 1)
         
