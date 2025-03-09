@@ -10,6 +10,7 @@ from .nodes.math import ExpMath, ExpMathDual, ExpMathQuad
 from .nodes.misc import EmptyLatentSize, EmptyLatentSize64, SchedulerSel, SamplerSel, LoraFluxParams
 from .nodes.models import LoadUnetAndClip, UnetClipLoraLoader, UnetClipLoraLoaderBasic, CkptPipe, ModelPipe1, ModelPipe2
 from .nodes.tuning import SamplerCustomAdvanced_Pipe, AIO_Tuner, AIO_Tuner_Pipe, Beta_Config, LMS_Config, BasicAdvScheduler, stopipe
+from .nodes.custom_nodes__sd_dynamic_thresholding import DynamicThresholding, DynamicThresholdingBasic
 #from .nodes.models import LoadUnetAndClip, UnetClipLoraLoader, UnetClipLoraLoaderBasic, CkptPipe, ModelPipe1, ModelPipe2, LoraHookSchedulerBasic, ModelPipeHooks
 
 
@@ -38,6 +39,8 @@ NODE_CLASS_MAPPINGS = {
     "LMS_Config": LMS_Config,
     "BasicAdvScheduler": BasicAdvScheduler,
     "stopipe": stopipe,
+    "DynamicThresholding": DynamicThresholding,
+    "DynamicThresholdingBasic": DynamicThresholdingBasic,
 }
 
 prefix = '🛸 '
@@ -65,6 +68,8 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "AIO_Tuner_Pipe": prefix + "AIO_Tuner_Pipe",
     "SamplerCustomAdvanced_Pipe": prefix + "SamplerCustomAdvanced_Pipe",
     "stopipe": prefix + "stopipe",
+    "DynamicThresholding": prefix + "DynamicThresholding",
+    "DynamicThresholdingBasic": prefix + "DynamicThresholdingBasic",
 }
 
 __all__ = ["NODE_CLASS_MAPPINGS", "NODE_DISPLAY_NAME_MAPPINGS", "WEB_DIRECTORY"]
