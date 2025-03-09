@@ -17,7 +17,7 @@ class SamplerCustomAdvanced_Pipe:
     def INPUT_TYPES(cls):
         return {
             "required": {
-                "SCA_PIPE": (any, ),
+                "SCA_PIPE": ("SCA_PIPE", ),
             }
         }
 
@@ -87,7 +87,7 @@ class AIO_Tuner:
                 "model": ("MODEL",),
                 "positive": ("CONDITIONING",),
                 "model_type": (MODEL_TYPES, ),
-                "guidance": ("FLOAT", {"default": 3.5, "min": 0.0, "max": 100.0, "step": 0.001}),
+                "guidance": ("FLOAT", {"default": 3.5, "min": 0.0, "max": 100.0, "step": 0.01}),
                 "sampler": (comfy.samplers.SAMPLER_NAMES, ),
                 "scheduler": (comfy.samplers.SCHEDULER_NAMES, ),
                 "steps": ("INT", {"default": 20, "min": 1, "max": 10000}),
@@ -206,7 +206,7 @@ class AIO_Tuner_Pipe:
                 "model": ("MODEL",),
                 "positive": ("CONDITIONING",),
                 "model_type": (MODEL_TYPES, ),
-                "guidance": ("FLOAT", {"default": 3.5, "min": 0.0, "max": 100.0, "step": 0.001}),
+                "guidance": ("FLOAT", {"default": 3.5, "min": 0.0, "max": 100.0, "step": 0.01}),
                 "sampler": (comfy.samplers.SAMPLER_NAMES, ),
                 "scheduler": (comfy.samplers.SCHEDULER_NAMES, ),
                 "steps": ("INT", {"default": 20, "min": 1, "max": 10000}),
