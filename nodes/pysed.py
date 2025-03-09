@@ -6,13 +6,13 @@ sed = Sed()
 
 class SedOnString:
     @classmethod
-    def INPUT_TYPES(s):
+    def INPUT_TYPES(cls):
         return {
             "required": {
-                "script_string": ("STRING", {"default": "'s/old/new/g'"}),
+                "script_string": ("STRING", {"default": 's/old/new/g', "multiline": False}),
             },
             "optional": {
-                "STRING": (any, ),
+                "STRING": ("STRING", {"default": '', "multiline": False, "defaultInput": True}),
             }
         }
 
@@ -22,11 +22,31 @@ class SedOnString:
 
     def do_stringsed(self, script_string, STRING=None):
 
-        sed.load_string(script_string)
-        trick_sed = io.StringIO(STRING)
-        modified_STRING = sed.apply(trick_sed)
+        if STRING is None:
+            return ("", )
 
-        return(modified_STRING, )
+        try:
+            sed.load_string(script_string) 
+        except SedException as e:
+            print(f"Error loading sed script: {e}")
+            return ("", )
+
+        trick_sed = io.StringIO(STRING)
+
+        try:
+            modified_list = sed.apply(trick_sed)
+            delimiter = " "
+            modified_str = delimiter.join(modified_list)
+            new_string = []
+            for line in io.StringIO(modified_str):
+                if not line.strip().startswith("\n"):
+                    line = line.replace("\n", '')
+                new_string.append(line)
+            new_string = "\n".join(new_string)
+            return (new_string, )
+        except SedException as e:
+            print(f"Error applying sed script: {e}")
+            return ("", )  # Return an empty string on error
 
 
 
