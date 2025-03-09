@@ -1,5 +1,4 @@
-from ..utils import any
-from ..names import CATEGORY, MODEL_TYPES
+from ..utils import CATEGORY, MODEL_TYPES, any
 import node_helpers
 import comfy.samplers
 from nodes import EmptyLatentImage, MAX_RESOLUTION
@@ -22,12 +21,12 @@ class SamplerCustomAdvanced_Pipe:
             }
         }
 
-    RETURN_TYPES = ("LATENT","LATENT")
-    RETURN_NAMES = ("output", "denoised_output")
+    RETURN_TYPES = ("LATENT", )
+    RETURN_NAMES = ("denoised_output", )
 
     FUNCTION = "get_sample"
 
-    CATEGORY = CATEGORY.MAIN.value + CATEGORY.TUNING.value
+    CATEGORY = CATEGORY.MAIN.value + "/Advanced"
 
     def get_sample(self, SCA_PIPE=None):
 
@@ -39,7 +38,7 @@ class SamplerCustomAdvanced_Pipe:
         out_denoised = out[1]
         out = out[0]
 
-        return (out, out_denoised)
+        return (out_denoised, )
 
 
 class stopipe:
@@ -58,8 +57,8 @@ class stopipe:
             }
         }
 
-    CATEGORY = CATEGORY.MAIN.value + CATEGORY.UTILS.value
-    RETURN_TYPES = (any,)
+    CATEGORY = CATEGORY.MAIN.value + "/Utils"
+    RETURN_TYPES = ("SCA_PIPE", )
 
     FUNCTION = "execute"
 
@@ -73,7 +72,7 @@ class stopipe:
         SCA_PIPE.append(sigmas)
         SCA_PIPE.append(latent_image)
 
-        return (SCA_PIPE,)
+        return (SCA_PIPE, )
 
 
 class AIO_Tuner:
@@ -99,12 +98,12 @@ class AIO_Tuner:
             },
             "optional": {
                 "negative": ("CONDITIONING",),
-                "Scheduler_config": (any, ),
-                "Sampler_config": (any, ),
+                "Scheduler_config": ("Scheduler_config", ),
+                "Sampler_config": ("Sampler_config", ),
             }
         }
     RETURN_TYPES = ("NOISE", "GUIDER", "SAMPLER", "SIGMAS", "LATENT")
-    CATEGORY = CATEGORY.MAIN.value + CATEGORY.TUNING.value
+    CATEGORY = CATEGORY.MAIN.value + "/Advanced"
 
     FUNCTION = "determine_settings"
 
@@ -218,12 +217,12 @@ class AIO_Tuner_Pipe:
             },
             "optional": {
                 "negative": ("CONDITIONING",),
-                "Scheduler_config": (any, ),
-                "Sampler_config": (any, ),
+                "Scheduler_config": ("Scheduler_config", ),
+                "Sampler_config": ("Sampler_config", ),
             }
         }
-    RETURN_TYPES = (any,)
-    CATEGORY = CATEGORY.MAIN.value + CATEGORY.TUNING.value
+    RETURN_TYPES = ("SCA_PIPE", )
+    CATEGORY = CATEGORY.MAIN.value + "/Advanced"
 
     FUNCTION = "determine_pipe_settings"
 
@@ -317,7 +316,7 @@ class AIO_Tuner_Pipe:
         SCA_PIPE.append(sigmas)
         SCA_PIPE.append(latent)
 
-        return (SCA_PIPE,)
+        return (SCA_PIPE, )
 
 
 class LMS_Config:
@@ -328,8 +327,8 @@ class LMS_Config:
                 "order": ("INT", {"default": 4, "min": 1, "max": 100}),
             }
         }
-    RETURN_TYPES = ("Sampler_config",)
-    CATEGORY = CATEGORY.MAIN.value + CATEGORY.TUNING.value
+    RETURN_TYPES = ("Sampler_config", )
+    CATEGORY = CATEGORY.MAIN.value + "/Advanced"
 
     FUNCTION = "get_LMS_Config"
 
@@ -349,8 +348,8 @@ class Beta_Config:
                 "beta": ("FLOAT", {"default": 0.6, "min": -50.0, "max": 50.0, "step":0.001, "round": False}),
             }
         }
-    RETURN_TYPES = ("Scheduler_config",)
-    CATEGORY = CATEGORY.MAIN.value + CATEGORY.TUNING.value
+    RETURN_TYPES = ("Scheduler_config", )
+    CATEGORY = CATEGORY.MAIN.value + "/Advanced"
 
     FUNCTION = "get_Beta_Config"
 
@@ -376,7 +375,7 @@ class BasicAdvScheduler:
             }
         }
     RETURN_TYPES = ("SIGMAS",)
-    CATEGORY = CATEGORY.MAIN.value + CATEGORY.TUNING.value
+    CATEGORY = CATEGORY.MAIN.value + "/Advanced"
 
     FUNCTION = "determine_sigmas"
 

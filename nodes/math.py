@@ -4,8 +4,7 @@ https://github.com/crystian/ComfyUI-Crystools
 https://github.com/cubiq/ComfyUI_essentials
   Many thanks goes to these awesome developers!
 '''
-from ..utils import any, BOOLEAN, INT, FLOAT, STRING
-from ..names import CATEGORY
+from ..utils import CATEGORY, any, BOOLEAN, INT, FLOAT, STRING
 import math
 import torch
 import time
@@ -24,7 +23,7 @@ class ExpMath:
             },
         }
 
-    CATEGORY = CATEGORY.MAIN.value + CATEGORY.MATH.value
+    CATEGORY = CATEGORY.MAIN.value + "/Math"
     RETURN_TYPES = ("INT", "FLOAT", )
     
     FUNCTION = "execute"
@@ -156,7 +155,7 @@ class ExpMathDual:
             },
         }
     
-    CATEGORY = CATEGORY.MAIN.value + CATEGORY.MATH.value
+    CATEGORY = CATEGORY.MAIN.value + "/Math"
     RETURN_TYPES = ("INT", "FLOAT", "INT", "FLOAT", )
     RETURN_NAMES = ("int_1", "float_1", "int_2", "float_2" )
     
@@ -185,7 +184,7 @@ class ExpMathQuad:
             },
         }
     
-    CATEGORY = CATEGORY.MAIN.value + CATEGORY.MATH.value
+    CATEGORY = CATEGORY.MAIN.value + "/Math"
     RETURN_TYPES = ("INT", "FLOAT", "INT", "FLOAT", "INT", "FLOAT", "INT", "FLOAT", )
     RETURN_NAMES = ("int_1", "float_1", "int_2", "float_2", "int_3", "float_3", "int_4", "float_4", )
     

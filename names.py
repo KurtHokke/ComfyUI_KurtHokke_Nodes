@@ -60,14 +60,3 @@ class CLASSES(Enum):
     
 
 
-class CATEGORY(Enum):
-    MAIN = "🛸KurtHokke"
-    UTILS = "/Utils"
-    MATH = "/Math"
-    LOADERS = "/Loaders"
-    PATCH = "/Patch"
-    SAMPLING = "/Sampling"
-    MISC = "/Misc"
-    TUNING = "/Tuning"
-
-MODEL_TYPES = ["FLUX", "SDXL"]

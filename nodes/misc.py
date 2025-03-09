@@ -1,11 +1,11 @@
-from ..names import CATEGORY
+from ..utils import CATEGORY, parse_string_to_list
 import comfy.model_management
 from nodes import MAX_RESOLUTION
 import torch
 import comfy.samplers
 import comfy.sample
 import folder_paths
-from ..utils import parse_string_to_list
+
 
 class EmptyLatentSize:
     def __init__(self):
@@ -18,7 +18,7 @@ class EmptyLatentSize:
             "height": ("INT", {"default": 1024, "min": 0, "max": MAX_RESOLUTION, "step": 8}),
             }}
 
-    CATEGORY = CATEGORY.MAIN.value + CATEGORY.MISC.value
+    CATEGORY = CATEGORY.MAIN.value + "/Latent"
     RETURN_TYPES = ("LATENT","INT","INT",)
     RETURN_NAMES = ("LATENT","width","height",)
     FUNCTION = "execute"
@@ -41,7 +41,7 @@ class EmptyLatentSize64:
             "height": ("INT", {"default": 1024, "min": 0, "max": MAX_RESOLUTION, "step": 64}),
             }}
 
-    CATEGORY = CATEGORY.MAIN.value + CATEGORY.MISC.value
+    CATEGORY = CATEGORY.MAIN.value + "/Latent"
     RETURN_TYPES = ("LATENT","INT","INT",)
     RETURN_NAMES = ("LATENT","width","height",)
     FUNCTION = "execute"
@@ -54,7 +54,7 @@ class EmptyLatentSize64:
 
 
 class SamplerSel:
-    CATEGORY = CATEGORY.MAIN.value + CATEGORY.SAMPLING.value
+    CATEGORY = CATEGORY.MAIN.value + "/Utils"
     RETURN_TYPES = ("STRING",)
     FUNCTION = "get_names"
 
@@ -67,7 +67,7 @@ class SamplerSel:
 
 
 class SchedulerSel:
-    CATEGORY = CATEGORY.MAIN.value + CATEGORY.SAMPLING.value
+    CATEGORY = CATEGORY.MAIN.value + "/Utils"
     RETURN_TYPES = ("STRING",)
     FUNCTION = "get_names"
 
@@ -106,7 +106,7 @@ class LoraFluxParams:
 
     RETURN_TYPES = ("LORA_PARAMS", )
     FUNCTION = "execute"
-    CATEGORY = CATEGORY.MAIN.value + CATEGORY.SAMPLING.value
+    CATEGORY = CATEGORY.MAIN.value + "/Advanced"
 
     def execute(self, lora_1, strength_lora_1, lora_2="none", strength_lora_2="", lora_3="none", strength_lora_3="", lora_4="none", strength_lora_4="", lora_5="none", strength_lora_5="", lora_6="none", strength_lora_6="", lora_7="none", strength_lora_7=""):
         output = { "loras": [], "strengths": [] }

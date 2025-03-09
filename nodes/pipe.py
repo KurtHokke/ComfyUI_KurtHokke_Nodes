@@ -4,8 +4,7 @@ https://github.com/crystian/ComfyUI-Crystools
 https://github.com/cubiq/ComfyUI_essentials
   Many thanks goes to these awesome developers!
 '''
-from ..utils import any, BOOLEAN, INT, FLOAT, STRING
-from ..names import CATEGORY
+from ..utils import CATEGORY, any, BOOLEAN, INT, FLOAT, STRING
 import math
 import torch
 import time
@@ -28,8 +27,8 @@ class BooleanToPipe:
             }
         }
 
-    CATEGORY = CATEGORY.MAIN.value + CATEGORY.UTILS.value
-    RETURN_TYPES = ("BoolPipe",)
+    CATEGORY = CATEGORY.MAIN.value + "/Utils"
+    RETURN_TYPES = ("BoolPipe", )
 
     FUNCTION = "execute"
 
@@ -42,7 +41,7 @@ class BooleanToPipe:
         BoolPipeMod.append(boolean_3)
         BoolPipeMod.append(boolean_4)
 
-        return (BoolPipeMod,)
+        return (BoolPipeMod, )
 
 class BooleanFromPipe:
     def __init__(self):
@@ -52,13 +51,13 @@ class BooleanFromPipe:
     def INPUT_TYPES(cls):
         return {
             "required": {
-                "BoolPipe": (any,),
+                "BoolPipe": ("BoolPipe", ),
             },
             "optional": {
             }
         }
 
-    CATEGORY = CATEGORY.MAIN.value + CATEGORY.UTILS.value
+    CATEGORY = CATEGORY.MAIN.value + "/Utils"
     RETURN_TYPES = ("BOOLEAN", "BOOLEAN", "BOOLEAN", "BOOLEAN",)
     RETURN_NAMES = ("boolean_1", "boolean_2", "boolean_3", "boolean_4",)
 

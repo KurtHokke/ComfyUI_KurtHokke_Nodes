@@ -4,6 +4,7 @@ https://github.com/crystian/ComfyUI-Crystools
 https://github.com/cubiq/ComfyUI_essentials
   Many thanks goes to these awesome developers!
 '''
+from enum import Enum
 import sys
 import contextlib
 import torch
@@ -120,3 +121,8 @@ def disable_load_models_gpu():
 
     with unittest.mock.patch.object(model_management, "load_models_gpu", foo):
         yield
+
+MODEL_TYPES = ["FLUX", "SDXL"]
+
+class CATEGORY(Enum):
+    MAIN = "🛸KurtHokke"
