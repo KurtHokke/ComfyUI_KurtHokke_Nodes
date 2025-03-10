@@ -1,5 +1,5 @@
-from ..utils import CATEGORY, any
-from PythonSed import Sed, SedException
+from ..utils import CATEGORY
+from ..packages.PythonSed import Sed, SedException
 import io
 
 sed = Sed()
