@@ -189,6 +189,7 @@ class AIO_Tuner_Pipe:
             },
             "optional": {
                 "negative": ("CONDITIONING",),
+                "samples": ("LATENT", ),
                 "Scheduler_config": ("Scheduler_config", ),
                 "Sampler_config": ("Sampler_config", ),
             }
@@ -209,7 +210,7 @@ class AIO_Tuner_Pipe:
 
 
     def determine_pipe_settings(self, model, positive, model_type, guidance, sampler, scheduler, steps, denoise, 
-                                width, height, noise_seed, negative=None, Scheduler_config=None, Sampler_config=None):
+                                width, height, noise_seed, negative=None, samples=None, Scheduler_config=None, Sampler_config=None):
         get_FluxGuidance = FluxGuidance()
         get_BasicGuider = BasicGuider()
         get_CFGGuider = CFGGuider()
@@ -297,8 +298,10 @@ class AIO_Tuner_Pipe:
         else:
             SCA_PIPE.append(scheduler)
 
-
-        latent = self.get_latent(model_type, width=width, height=height, batch_size=1)[0]
+        if samples is None:
+            latent = self.get_latent(model_type, width=width, height=height, batch_size=1)[0]
+        else:
+            latent = samples['samples']
 
         SCA_PIPE.append(latent)
 
