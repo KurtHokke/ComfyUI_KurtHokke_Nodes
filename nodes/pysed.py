@@ -1,6 +1,7 @@
 from ..utils import CATEGORY
 from ..packages.PythonSed import Sed, SedException
 import io
+import re
 
 sed = Sed()
 
@@ -9,24 +10,24 @@ class SedOnString:
     def INPUT_TYPES(cls):
         return {
             "required": {
-                "script_string": ("STRING", {"default": 's/old/new/g', "multiline": False}),
+                "script_str": ("STRING", {"default": 's/old/new/', "multiline": False}),
             },
             "optional": {
-                "STRING": ("STRING", {"default": '', "multiline": False, "defaultInput": True}),
+                "STRING": ("STRING", {"default": '', "multiline": True, "defaultInput": True}),
             }
         }
 
     RETURN_TYPES = ("STRING", )
     FUNCTION = "do_stringsed"
-    CATEGORY = CATEGORY.MAIN.value + "/Advanced/Tools"
+    CATEGORY = CATEGORY.MAIN.value + "/Tools"
 
-    def do_stringsed(self, script_string, STRING=None):
+    def do_stringsed(self, script_str, STRING=None):
 
         if STRING is None:
             return ("", )
 
         try:
-            sed.load_string(script_string) 
+            sed.load_string(script_str)
         except SedException as e:
             print(f"Error loading sed script: {e}")
             return ("", )
@@ -37,13 +38,9 @@ class SedOnString:
             modified_list = sed.apply(trick_sed)
             delimiter = " "
             modified_str = delimiter.join(modified_list)
-            new_string = []
-            for line in io.StringIO(modified_str):
-                if not line.strip().startswith("\n"):
-                    line = line.replace("\n", '')
-                new_string.append(line)
-            new_string = "\n".join(new_string)
-            return (new_string, )
+            stripped_str = re.sub(r'\n\s', '\n', modified_str)
+            complete_str = re.sub(r'\n$', '', stripped_str)
+            return (complete_str, )
         except SedException as e:
             print(f"Error applying sed script: {e}")
             return ("", )  # Return an empty string on error

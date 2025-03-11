@@ -232,7 +232,7 @@ class AIO_Tuner_Pipe:
 
         if model_type == "FLUX":
             if negative is None:
-                positive = get_FluxGuidance.append(conditioning=positive, guidance=guidance)
+                positive = get_FluxGuidance.append(conditioning=positive, guidance=guidance)[0]
                 guider = get_BasicGuider.get_guider(model=model, conditioning=positive)[0]
             else:
                 positive = get_FluxGuidance.append(conditioning=positive, guidance=guidance)

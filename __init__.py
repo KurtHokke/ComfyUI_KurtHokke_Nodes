@@ -4,7 +4,7 @@ https://github.com/crystian/ComfyUI-Crystools
 https://github.com/cubiq/ComfyUI_essentials
   Many thanks goes to these awesome developers!
 '''
-#from enum import Enum
+from .nodes.util_nodes import Node_BOOL, Node_INT, Node_Float, Node_String, Node_StringMultiline
 from .nodes.pipe import BooleanToPipe, BooleanFromPipe
 from .nodes.math import ExpMath, ExpMathDual, ExpMathQuad
 from .nodes.misc import EmptyLatentSize, EmptyLatentSize64, SchedulerSel, SamplerSel, LoraFluxParams
@@ -13,12 +13,17 @@ from .nodes.tuning import SamplerCustomAdvanced_Pipe, AIO_Tuner, AIO_Tuner_Pipe,
 from .nodes.custom_nodes__sd_dynamic_thresholding import DynamicThresholding, DynamicThresholdingBasic
 from .nodes.cond import CLIPTextEncode_Pipe
 from .nodes.pysed import SedOnString
-#from .nodes.experimental_hooks import LoraHookChain, ModelPipe3
-#from .nodes.models import LoadUnetAndClip, UnetClipLoraLoader, UnetClipLoraLoaderBasic, CkptPipe, ModelPipe1, ModelPipe2, LoraHookSchedulerBasic, ModelPipeHooks
-
+from .nodes.str_manipulation import str_str, str_str_str_str
+from .nodes.modelinfo import get_lora_metadata
+from .nodes.loaders import NoModel_CkptLoader
 
 
 NODE_CLASS_MAPPINGS = {
+    "Node_BOOL": Node_BOOL,
+    "Node_INT": Node_INT,
+    "Node_Float": Node_Float,
+    "Node_String": Node_String,
+    "Node_StringMultiline": Node_StringMultiline,
     "BooleanToPipe": BooleanToPipe,
     "BooleanFromPipe": BooleanFromPipe,
     "ExpMath": ExpMath,
@@ -46,12 +51,19 @@ NODE_CLASS_MAPPINGS = {
     "DynamicThresholdingBasic": DynamicThresholdingBasic,
     "CLIPTextEncode_Pipe": CLIPTextEncode_Pipe,
     "SedOnString": SedOnString,
-#    "LoraHookChain": LoraHookChain,
-#    "ModelPipe3": ModelPipe3,
+    "str_str": str_str,
+    "str_str_str_str": str_str_str_str,
+    "get_lora_metadata": get_lora_metadata,
+    "NoModel_CkptLoader": NoModel_CkptLoader,
 }
 
 prefix = '🛸 '
 NODE_DISPLAY_NAME_MAPPINGS = {
+    "Node_BOOL": prefix + "BOOL",
+    "Node_INT": prefix + "INT",
+    "Node_Float": prefix + "Float",
+    "Node_String": prefix + "String",
+    "Node_StringMultiline": prefix + "StringMultiline",
     "BooleanToPipe": prefix + "BooleanToPipe",
     "BooleanFromPipe": prefix + "BooleanFromPipe",
     "ExpMath": prefix + "ExpMath",
@@ -79,8 +91,10 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "DynamicThresholdingBasic": prefix + "DynamicThresholdingBasic",
     "CLIPTextEncode_Pipe": prefix + "CLIPTextEncode_Pipe",
     "SedOnString": prefix + "SedOnString",
-#    "LoraHookChain": prefix + "LoraHookChain",
-#    "ModelPipe3": prefix + "ModelPipe3",
+    "str_str": prefix + "str_str",
+    "str_str_str_str": prefix + "str_str_str_str",
+    "get_lora_metadata": prefix + "get_lora_metadata",
+    "NoModel_CkptLoader": prefix + "NoModel_CkptLoader",
 }
 
 __all__ = ["NODE_CLASS_MAPPINGS", "NODE_DISPLAY_NAME_MAPPINGS", "WEB_DIRECTORY"]
