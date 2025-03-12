@@ -241,8 +241,7 @@ class MergeExtraOpts:
 class COND_ExtraOpts:
     @classmethod
     def INPUT_TYPES(s):
-        return {"required": {"cond_n": ("STRING", {"default": "1,2"}),
-                             "combine": ("BOOLEAN", {"default": True, "label_on": "On", "label_off": "Off"}),
+        return {"required": {"combine": ("BOOLEAN", {"default": True, "label_on": "On", "label_off": "Off"}),
                              "concat": ("BOOLEAN", {"default": False, "label_on": "On", "label_off": "Off"}),
                              "concat_where": (CONCAT_WHERE, ),
                              "average": ("BOOLEAN", {"default": False, "label_on": "On", "label_off": "Off"}),
@@ -254,26 +253,25 @@ class COND_ExtraOpts:
     FUNCTION = "pack_extra_opts"
     CATEGORY = CATEGORY.MAIN.value + "/Advanced"
 
-    def pack_extra_opts(self, cond_n, combine, average, average_strength, concat, concat_where):
-        extra_opts1 = {"cond_n": cond_n}
+    def pack_extra_opts(self, combine, average, average_strength, concat, concat_where):
         if combine:
-            extra_opts2 = {"combine": combine}
+            extra_opts1 = {"combine": combine}
         else:
-            extra_opts2 = {}
+            extra_opts1 = {}
 
         if average:
-            extra_opts3 = {"average": average}
-            extra_opts4 = {"average_strength": average_strength}
+            extra_opts2 = {"average": average}
+            extra_opts3 = {"average_strength": average_strength}
         else:
+            extra_opts2 = {}
             extra_opts3 = {}
-            extra_opts4 = {}
         if concat:
-            extra_opts5 = {"concat": concat}
-            extra_opts6 = {"concat_where": concat_where}
+            extra_opts4 = {"concat": concat}
+            extra_opts5 = {"concat_where": concat_where}
         else:
+            extra_opts4 = {}
             extra_opts5 = {}
-            extra_opts6 = {}
-        extra_opts = {**extra_opts1, **extra_opts2, **extra_opts3, **extra_opts4, **extra_opts5, **extra_opts6}
+        extra_opts = {**extra_opts1, **extra_opts2, **extra_opts3, **extra_opts4, **extra_opts5}
         return (extra_opts, )
 
 
@@ -298,38 +296,6 @@ class VAE_ExtraOpts:
             extra_opts = {}
         return (extra_opts, )
 
-class VAEDecodeTiled:
-    @classmethod
-    def INPUT_TYPES(s):
-        return {"required": {"samples": ("LATENT", ), "vae": ("VAE", ),
-                             "tile_size": ("INT", {"default": 512, "min": 64, "max": 4096, "step": 32}),
-                             "overlap": ("INT", {"default": 64, "min": 0, "max": 4096, "step": 32}),
-                             "temporal_size": ("INT", {"default": 64, "min": 8, "max": 4096, "step": 4, "tooltip": "Only used for video VAEs: Amount of frames to decode at a time."}),
-                             "temporal_overlap": ("INT", {"default": 8, "min": 4, "max": 4096, "step": 4, "tooltip": "Only used for video VAEs: Amount of frames to overlap."}),
-                            }}
-    RETURN_TYPES = ("IMAGE",)
-    FUNCTION = "decode"
-
-    CATEGORY = "_for_testing"
-
-    def decode(self, vae, samples, tile_size, overlap=64, temporal_size=64, temporal_overlap=8):
-        if tile_size < overlap * 4:
-            overlap = tile_size // 4
-        if temporal_size < temporal_overlap * 2:
-            temporal_overlap = temporal_overlap // 2
-        temporal_compression = vae.temporal_compression_decode()
-        if temporal_compression is not None:
-            temporal_size = max(2, temporal_size // temporal_compression)
-            temporal_overlap = max(1, min(temporal_size // 2, temporal_overlap // temporal_compression))
-        else:
-            temporal_size = None
-            temporal_overlap = None
-
-        compression = vae.spacial_compression_decode()
-        images = vae.decode_tiled(samples["samples"], tile_x=tile_size // compression, tile_y=tile_size // compression, overlap=overlap // compression, tile_t=temporal_size, overlap_t=temporal_overlap)
-        if len(images.shape) == 5: #Combine batches
-            images = images.reshape(-1, images.shape[-3], images.shape[-2], images.shape[-1])
-        return (images, )
 
 class SamplerCustomAdvanced_Pipe:
     def __init__(self):
