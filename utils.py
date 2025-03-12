@@ -123,6 +123,7 @@ def disable_load_models_gpu():
         yield
 
 MODEL_TYPES = ["FLUX", "SDXL"]
+CONCAT_WHERE = ["<", ">"]
 
 class CATEGORY(Enum):
     MAIN = "🛸KurtHokke"

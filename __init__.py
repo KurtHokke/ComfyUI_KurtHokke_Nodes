@@ -5,13 +5,14 @@ https://github.com/cubiq/ComfyUI_essentials
   Many thanks goes to these awesome developers!
 '''
 from .nodes.util_nodes import Node_BOOL, Node_INT, Node_Float, Node_String, Node_StringMultiline
+from .nodes.debug import debug_object
 from .nodes.pipe import BooleanToPipe, BooleanFromPipe
 from .nodes.math import ExpMath, ExpMathDual, ExpMathQuad
 from .nodes.misc import EmptyLatentSize, EmptyLatentSize64, SchedulerSel, SamplerSel, LoraFluxParams
 from .nodes.models import LoadUnetAndClip, UnetClipLoraLoader, UnetClipLoraLoaderBasic, CkptPipe, ModelPipe1, ModelPipe2
-from .nodes.tuning import SamplerCustomAdvanced_Pipe, AIO_Tuner, AIO_Tuner_Pipe, Beta_Config, LMS_Config, BasicAdvScheduler, stopipe
+from .nodes.tuning import SamplerCustomAdvanced_Pipe, AIO_Tuner_Pipe, MergeExtraOpts, VAE_ExtraOpts, COND_ExtraOpts
 from .nodes.custom_nodes__sd_dynamic_thresholding import DynamicThresholding, DynamicThresholdingBasic
-from .nodes.cond import CLIPTextEncode_Pipe
+from .nodes.cond import ChainTextEncode
 from .nodes.pysed import SedOnString
 from .nodes.str_manipulation import str_str, str_str_str_str
 from .nodes.modelinfo import get_lora_metadata
@@ -24,6 +25,7 @@ NODE_CLASS_MAPPINGS = {
     "Node_Float": Node_Float,
     "Node_String": Node_String,
     "Node_StringMultiline": Node_StringMultiline,
+    "debug_object": debug_object,
     "BooleanToPipe": BooleanToPipe,
     "BooleanFromPipe": BooleanFromPipe,
     "ExpMath": ExpMath,
@@ -40,16 +42,14 @@ NODE_CLASS_MAPPINGS = {
     "CkptPipe": CkptPipe,
     "ModelPipe1": ModelPipe1,
     "ModelPipe2": ModelPipe2,
-    "AIO_Tuner": AIO_Tuner,
     "AIO_Tuner_Pipe": AIO_Tuner_Pipe,
     "SamplerCustomAdvanced_Pipe": SamplerCustomAdvanced_Pipe,
-    "Beta_Config": Beta_Config,
-    "LMS_Config": LMS_Config,
-    "BasicAdvScheduler": BasicAdvScheduler,
-    "stopipe": stopipe,
+    "MergeExtraOpts": MergeExtraOpts,
+    "VAE_ExtraOpts": VAE_ExtraOpts,
+    "COND_ExtraOpts": COND_ExtraOpts,
     "DynamicThresholding": DynamicThresholding,
     "DynamicThresholdingBasic": DynamicThresholdingBasic,
-    "CLIPTextEncode_Pipe": CLIPTextEncode_Pipe,
+    "ChainTextEncode": ChainTextEncode,
     "SedOnString": SedOnString,
     "str_str": str_str,
     "str_str_str_str": str_str_str_str,
@@ -64,6 +64,7 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "Node_Float": prefix + "Float",
     "Node_String": prefix + "String",
     "Node_StringMultiline": prefix + "StringMultiline",
+    "debug_object": prefix + "debug_object",
     "BooleanToPipe": prefix + "BooleanToPipe",
     "BooleanFromPipe": prefix + "BooleanFromPipe",
     "ExpMath": prefix + "ExpMath",
@@ -80,16 +81,14 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "CkptPipe": prefix + "CkptPipe",
     "ModelPipe1": prefix + ">ModelPipe",
     "ModelPipe2": prefix + "<ModelPipe",
-    "BasicAdvScheduler": prefix + "BasicAdvScheduler",
-    "Beta_Config": prefix + "Beta_Config",
-    "LMS_Config": prefix + "LMS_Config",
-    "AIO_Tuner": prefix + "AIO_Tuner",
     "AIO_Tuner_Pipe": prefix + "AIO_Tuner_Pipe",
     "SamplerCustomAdvanced_Pipe": prefix + "SamplerCustomAdvanced_Pipe",
-    "stopipe": prefix + "stopipe",
+    "MergeExtraOpts": prefix + "MergeExtraOpts",
+    "VAE_ExtraOpts": prefix + "VAE_ExtraOpts",
+    "COND_ExtraOpts": prefix + "COND_ExtraOpts",
     "DynamicThresholding": prefix + "DynamicThresholding",
     "DynamicThresholdingBasic": prefix + "DynamicThresholdingBasic",
-    "CLIPTextEncode_Pipe": prefix + "CLIPTextEncode_Pipe",
+    "ChainTextEncode": prefix + "ChainTextEncode",
     "SedOnString": prefix + "SedOnString",
     "str_str": prefix + "str_str",
     "str_str_str_str": prefix + "str_str_str_str",
