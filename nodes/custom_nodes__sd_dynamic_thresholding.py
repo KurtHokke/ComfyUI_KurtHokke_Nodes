@@ -37,7 +37,7 @@ class DynamicThresholding:
 
     RETURN_TYPES = ("MODEL",)
     FUNCTION = "patch"
-    CATEGORY = CATEGORY.MAIN.value + "/Advanced"
+    CATEGORY = CATEGORY.MAIN.value + CATEGORY.ADVANCED.value
 
     def patch(self, UnetClipPipe, mimic_scale, threshold_percentile, mimic_mode, mimic_scale_min, cfg_mode, cfg_scale_min, sched_val, separate_feature_channels, scaling_startpoint, variability_measure, interpolate_phi):
 
@@ -77,7 +77,7 @@ class DynamicThresholdingBasic:
 
     RETURN_TYPES = ("MODEL",)
     FUNCTION = "patch"
-    CATEGORY = CATEGORY.MAIN.value + "/Advanced"
+    CATEGORY = CATEGORY.MAIN.value + CATEGORY.ADVANCED.value
 
     def patch(self, UnetClipPipe, mimic_scale, threshold_percentile):
 

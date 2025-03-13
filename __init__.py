@@ -1,25 +1,25 @@
-'''
-    !DISCLAIMER! I'm very new to programming and I've been heavily inspired by following.
-https://github.com/crystian/ComfyUI-Crystools
-https://github.com/cubiq/ComfyUI_essentials
-  Many thanks goes to these awesome developers!
-'''
+
+from .utils import CATEGORY
 from .nodes.util_nodes import Node_BOOL, Node_INT, Node_Float, Node_String, Node_StringMultiline
-from .nodes.debug import debug_object
 from .nodes.pipe import BooleanToPipe, BooleanFromPipe
 from .nodes.math import ExpMath, ExpMathDual, ExpMathQuad
 from .nodes.misc import EmptyLatentSize, EmptyLatentSize64, SchedulerSel, SamplerSel, LoraFluxParams
 from .nodes.models import LoadUnetAndClip, UnetClipLoraLoader, UnetClipLoraLoaderBasic, CkptPipe, ModelPipe1, ModelPipe2
-from .nodes.tuning import SamplerCustomAdvanced_Pipe, AIO_Tuner_Pipe, MergeExtraOpts, VAE_ExtraOpts, COND_ExtraOpts
+from .nodes.tuning import SamplerCustomAdvanced_Pipe, AIO_Tuner_Pipe
+from .nodes.extraopts import MergeExtraOpts, VAE_ExtraOpts, COND_ExtraOpts
 from .nodes.custom_nodes__sd_dynamic_thresholding import DynamicThresholding, DynamicThresholdingBasic
-from .nodes.cond import ChainTextEncode
+from .nodes.cond import ChainTextEncode, mycombine
 from .nodes.pysed import SedOnString
 from .nodes.pyre import re_sub_str
 from .nodes.str_manipulation import str_str, str_str_str_str
 from .nodes.modelinfo import get_lora_metadata
 from .nodes.loaders import NoModel_CkptLoader
+from .nodes.debug import ExecutePythonNode
+from .nodes.bashnode import BashScriptNode
 
 
+
+prefix = CATEGORY.prefix.value
 
 NODE_CLASS_MAPPINGS = {
     "Node_BOOL": Node_BOOL,
@@ -27,7 +27,6 @@ NODE_CLASS_MAPPINGS = {
     "Node_Float": Node_Float,
     "Node_String": Node_String,
     "Node_StringMultiline": Node_StringMultiline,
-    "debug_object": debug_object,
     "BooleanToPipe": BooleanToPipe,
     "BooleanFromPipe": BooleanFromPipe,
     "ExpMath": ExpMath,
@@ -58,16 +57,18 @@ NODE_CLASS_MAPPINGS = {
     "str_str_str_str": str_str_str_str,
     "get_lora_metadata": get_lora_metadata,
     "NoModel_CkptLoader": NoModel_CkptLoader,
+    "ExecutePythonNode": ExecutePythonNode,
+    "BashScriptNode": BashScriptNode,
+    "mycombine": mycombine,
 }
 
-prefix = '🛸 '
+
 NODE_DISPLAY_NAME_MAPPINGS = {
     "Node_BOOL": prefix + "BOOL",
     "Node_INT": prefix + "INT",
     "Node_Float": prefix + "Float",
     "Node_String": prefix + "String",
     "Node_StringMultiline": prefix + "StringMultiline",
-    "debug_object": prefix + "debug_object",
     "BooleanToPipe": prefix + "BooleanToPipe",
     "BooleanFromPipe": prefix + "BooleanFromPipe",
     "ExpMath": prefix + "ExpMath",
@@ -98,8 +99,12 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "str_str_str_str": prefix + "str_str_str_str",
     "get_lora_metadata": prefix + "get_lora_metadata",
     "NoModel_CkptLoader": prefix + "NoModel_CkptLoader",
+    "ExecutePythonNode": prefix + "ExecutePythonNode",
+    "BashScriptNode": prefix + "BashScriptNode",
+    "mycombine": prefix + "mycombine",
 }
 
 __all__ = ["NODE_CLASS_MAPPINGS", "NODE_DISPLAY_NAME_MAPPINGS", "WEB_DIRECTORY"]
 
 WEB_DIRECTORY = "./web"
+

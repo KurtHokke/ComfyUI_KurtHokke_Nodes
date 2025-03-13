@@ -23,7 +23,7 @@ class ExpMath:
             },
         }
 
-    CATEGORY = CATEGORY.MAIN.value + "/Math"
+    CATEGORY = CATEGORY.MAIN.value + CATEGORY.MATH.value
     RETURN_TYPES = ("INT", "FLOAT", )
     
     FUNCTION = "execute"
@@ -155,7 +155,7 @@ class ExpMathDual:
             },
         }
     
-    CATEGORY = CATEGORY.MAIN.value + "/Math"
+    CATEGORY = CATEGORY.MAIN.value + CATEGORY.MATH.value
     RETURN_TYPES = ("INT", "FLOAT", "INT", "FLOAT", )
     RETURN_NAMES = ("int_1", "float_1", "int_2", "float_2" )
     
@@ -184,7 +184,7 @@ class ExpMathQuad:
             },
         }
     
-    CATEGORY = CATEGORY.MAIN.value + "/Math"
+    CATEGORY = CATEGORY.MAIN.value + CATEGORY.MATH.value
     RETURN_TYPES = ("INT", "FLOAT", "INT", "FLOAT", "INT", "FLOAT", "INT", "FLOAT", )
     RETURN_NAMES = ("int_1", "float_1", "int_2", "float_2", "int_3", "float_3", "int_4", "float_4", )
     

@@ -13,7 +13,7 @@ class NoModel_CkptLoader:
     RETURN_TYPES = ("CLIP", "VAE")
     FUNCTION = "load_nomodel_checkpoint"
 
-    CATEGORY = CATEGORY.MAIN.value + "/Loader"
+    CATEGORY = CATEGORY.MAIN.value + CATEGORY.LOADERS.value
 
     def load_nomodel_checkpoint(self, ckpt_name):
         ckpt_path = folder_paths.get_full_path_or_raise("checkpoints", ckpt_name)

@@ -19,7 +19,7 @@ class SedOnString:
 
     RETURN_TYPES = ("STRING", )
     FUNCTION = "do_stringsed"
-    CATEGORY = CATEGORY.MAIN.value + "/Tools"
+    CATEGORY = CATEGORY.MAIN.value + CATEGORY.TOOLS.value
 
     def do_stringsed(self, script_str, STRING=None):
 
@@ -46,24 +46,3 @@ class SedOnString:
             return ("", )  # Return an empty string on error
 
 
-
-'''
-# Load a script from a string
-my_script_string = """
-s/old/new/g
-"""
-sed.load_string(my_script_string)
-
-# Alternatively, load a script from a file
-# with open('my_script.sed', 'r') as f:
-#     sed.load_script(f)
-
-# Example input string
-input_string = "This is the old string."
-input_file_like = io.StringIO(input_string)
-
-# Apply the sed script to the input string
-output_string = sed.apply(input_file_like)
-
-print(output_string)  # Output: This is the new string.
-'''

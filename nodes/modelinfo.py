@@ -19,7 +19,7 @@ class get_lora_metadata:
     RETURN_TYPES = ("STRING", "STRING")
     RETURN_NAMES = ("tags", "tag_per_line")
     FUNCTION = "get_metadata"
-    CATEGORY = CATEGORY.MAIN.value + ""
+    CATEGORY = CATEGORY.MAIN.value + CATEGORY.TOOLS.value
 
     def get_metadata(self, lora_name, filter=None):
         try:

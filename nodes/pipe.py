@@ -27,7 +27,7 @@ class BooleanToPipe:
             }
         }
 
-    CATEGORY = CATEGORY.MAIN.value + "/Utils"
+    CATEGORY = CATEGORY.MAIN.value + CATEGORY.UTILS.value
     RETURN_TYPES = ("BoolPipe", )
 
     FUNCTION = "execute"
@@ -57,7 +57,7 @@ class BooleanFromPipe:
             }
         }
 
-    CATEGORY = CATEGORY.MAIN.value + "/Utils"
+    CATEGORY = CATEGORY.MAIN.value + CATEGORY.UTILS.value
     RETURN_TYPES = ("BOOLEAN", "BOOLEAN", "BOOLEAN", "BOOLEAN",)
     RETURN_NAMES = ("boolean_1", "boolean_2", "boolean_3", "boolean_4",)
 

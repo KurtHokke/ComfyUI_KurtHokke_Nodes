@@ -35,7 +35,7 @@ class LoadUnetAndClip:
     RETURN_TYPES = ("UnetClipPipe", )
     FUNCTION = "load_unet"
 
-    CATEGORY = CATEGORY.MAIN.value + "/Loader"
+    CATEGORY = CATEGORY.MAIN.value + CATEGORY.LOADERS.value
 
     def load_unet(self, unet_name, weight_dtype, clip_name1, clip_name2, type, CLIPskip, device="default",):
         model_options = {}
@@ -81,7 +81,7 @@ class CkptPipe:
 
     RETURN_TYPES = ("UnetClipPipe", "VAE")
     FUNCTION = "load_ckpt"
-    CATEGORY = CATEGORY.MAIN.value + "/Loader"
+    CATEGORY = CATEGORY.MAIN.value + CATEGORY.LOADERS.value
 
     def load_ckpt(self, ckpt_name, CLIPskip):
         from nodes import CheckpointLoaderSimple
@@ -110,7 +110,7 @@ class ModelPipe1:
 
     RETURN_TYPES = ("UnetClipPipe", )
     FUNCTION = "do_pipe"
-    CATEGORY = CATEGORY.MAIN.value + "/Utils"
+    CATEGORY = CATEGORY.MAIN.value + CATEGORY.UTILS.value
 
     def do_pipe(self, MODEL, CLIP):
         model = MODEL
@@ -133,7 +133,7 @@ class ModelPipe2:
 
     RETURN_TYPES = ("MODEL", "CLIP")
     FUNCTION = "un_pipe"
-    CATEGORY = CATEGORY.MAIN.value + "/Utils"
+    CATEGORY = CATEGORY.MAIN.value + CATEGORY.UTILS.value
 
     def un_pipe(self, UnetClipPipe):
         model, clip = UnetClipPipe
@@ -158,7 +158,7 @@ class UnetClipLoraLoader:
     RETURN_TYPES = ("UnetClipPipe",)
     FUNCTION = "load_lora"
 
-    CATEGORY = CATEGORY.MAIN.value + "/Loras"
+    CATEGORY = CATEGORY.MAIN.value + CATEGORY.LORAS.value
 
     def load_lora(self, lora_name, strength_model, strength_clip, UnetClipPipe=None):
         if strength_model == 0 and strength_clip == 0:
@@ -205,7 +205,7 @@ class UnetClipLoraLoaderBasic:
     RETURN_TYPES = ("UnetClipPipe", )
     FUNCTION = "load_lora"
 
-    CATEGORY = CATEGORY.MAIN.value + "/Loras"
+    CATEGORY = CATEGORY.MAIN.value + CATEGORY.LORAS.value
 
     def load_lora(self, lora_name, strength, UnetClipPipe=None):
 

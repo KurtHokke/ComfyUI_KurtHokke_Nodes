@@ -10,7 +10,7 @@ class Node_BOOL:
     RETURN_TYPES = ("BOOLEAN",)
     RETURN_NAMES = ("value",)
     FUNCTION = "get_value"
-    CATEGORY = CATEGORY.MAIN.value + "/Utils"
+    CATEGORY = CATEGORY.MAIN.value + CATEGORY.UTILS.value
 
     def get_value(self, value):
         return (value,)
@@ -25,7 +25,7 @@ class Node_INT:
     RETURN_TYPES = ("INT",)
     RETURN_NAMES = ("value",)
     FUNCTION = "get_value"
-    CATEGORY = CATEGORY.MAIN.value + "/Utils"
+    CATEGORY = CATEGORY.MAIN.value + CATEGORY.UTILS.value
 
     def get_value(self, value):
         return (value,)
@@ -41,7 +41,7 @@ class Node_Float:
     RETURN_TYPES = ("FLOAT",)
     RETURN_NAMES = ("value",)
     FUNCTION = "get_value"
-    CATEGORY = CATEGORY.MAIN.value + "/Utils"
+    CATEGORY = CATEGORY.MAIN.value + CATEGORY.UTILS.value
 
     def get_value(self, value):
         return (value,)
@@ -57,7 +57,7 @@ class Node_String:
 
     RETURN_TYPES = ("STRING",)
     FUNCTION = "passtring"
-    CATEGORY = CATEGORY.MAIN.value + "/Utils"
+    CATEGORY = CATEGORY.MAIN.value + CATEGORY.UTILS.value
 
     def passtring(self, _):
         string = _
@@ -73,7 +73,7 @@ class Node_StringMultiline:
         }
     RETURN_TYPES = ("STRING",)
     FUNCTION = "stringify"
-    CATEGORY = CATEGORY.MAIN.value + "/Utils"
+    CATEGORY = CATEGORY.MAIN.value + CATEGORY.UTILS.value
 
     def stringify(self, string):
         return (string, )

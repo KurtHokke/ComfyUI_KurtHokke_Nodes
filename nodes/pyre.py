@@ -16,7 +16,7 @@ class re_sub_str:
     RETURN_TYPES = ("STRING",)
     RETURN_NAMES = ("string",)
     FUNCTION = "re_do_sub"
-    CATEGORY = CATEGORY.MAIN.value + "/Tools"
+    CATEGORY = CATEGORY.MAIN.value + CATEGORY.TOOLS.value
 
     def re_do_sub(self, string, script_str, script_rpl):
         out = re.sub(script_str, script_rpl, string)

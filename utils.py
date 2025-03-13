@@ -6,8 +6,76 @@ https://github.com/cubiq/ComfyUI_essentials
 '''
 from enum import Enum
 import sys
+import configparser
+import os
 import contextlib
 import torch
+
+parent_dir = os.path.dirname(os.path.abspath(__file__))
+
+# Path to the config file
+config_path = os.path.join(parent_dir, 'config.ini')
+
+
+# Function to retrieve feature flag
+def get_feature_flag():
+    if not os.path.exists(config_path):
+        raise FileNotFoundError(f"Config file not found at {config_path}")
+
+    config = configparser.ConfigParser()
+    config.read(config_path)
+
+    try:
+        return config.getboolean('Features', 'Emoji_in_categories')
+    except (configparser.NoSectionError, configparser.NoOptionError):
+        raise Exception("The required configuration (Features -> Emoji_in_categories) is missing in the config file.")
+
+
+# Define alternate CATEGORY classes
+class EmojiCategoriesEnabled:
+    class CATEGORYEMOJI(Enum):
+        MAIN = "🛸☞KurtHokke☜"
+        UTILS = "/🔧utils"
+        TOOLS = "/🧰tools"
+        LOADERS = "/🚀loaders"
+        MATH = "/🪄math"
+        ADVANCED = "/🧬advanced"
+        LORAS = "/🟣loras"
+        CONDITIONING = "/🟠conditioning"
+        EXTRAOPTS = "/⚙️extraopts"
+
+        prefix = '>🛸 '
+
+    def show_categories(self):
+        print("Using categories with emojis!")
+
+
+class EmojiCategoriesDisabled:
+    class CATEGORYNOEMOJI(Enum):
+        MAIN = "/KurtHokke"
+        UTILS = "/utils"
+        TOOLS = "/tools"
+        LOADERS = "/loaders"
+        MATH = "/math"
+        ADVANCED = "/advanced"
+        LORAS = "/loras"
+        CONDITIONING = "/conditioning"
+        EXTRAOPTS = "/extraopts"
+
+        prefix = '> '
+
+    def show_categories(self):
+        print("Using categories without emojis!")
+
+
+# Dynamically assign CATEGORY based on the configuration
+feature_enabled = get_feature_flag()
+
+if feature_enabled:
+    CATEGORY = EmojiCategoriesEnabled.CATEGORYEMOJI
+else:
+    CATEGORY = EmojiCategoriesDisabled.CATEGORYNOEMOJI
+
 
 FLOAT = ("FLOAT", {"default": 1,
                    "min": -sys.float_info.max,
@@ -123,7 +191,5 @@ def disable_load_models_gpu():
         yield
 
 MODEL_TYPES = ["FLUX", "SDXL"]
-CONCAT_WHERE = ["<", ">"]
-
-class CATEGORY(Enum):
-    MAIN = "🛸KurtHokke"
+COND_DIRECTION = ["<", ">", "<", ">", "<", ">", "<", ">", "<", ">", "<", ">", "<", ">", "<", ">", "<", ">", "<", ">", "<", ">", "<", ">", "<", ">", "<", ">", "<", ">", "<", ">", "<", ">"]
+COND_OPTS = ["concat", "average", "combine"]
