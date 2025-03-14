@@ -37,7 +37,6 @@ class AIO_Tuner_Pipe:
                 "width": ("INT", {"default": 1024, "min": 16, "max": MAX_RESOLUTION, "step": 16}),
                 "height": ("INT", {"default": 1024, "min": 16, "max": MAX_RESOLUTION, "step": 16}),
                 "noise_seed": ("INT", {"default": 0, "min": 0, "max": 0xffffffffffffffff}),
-                "debug": ("BOOLEAN", {"default": False}),
             },
             "optional": {
                 "model": ("MODEL", ),
@@ -51,8 +50,8 @@ class AIO_Tuner_Pipe:
                 "extra_opts": ("EXTRA_OPTS", ),
             }
         }
-    RETURN_TYPES = ("SCA_PIPE", "CONDITIONING", "CONDITIONING", "CONDITIONING", "CONDITIONING", any)
-    RETURN_NAMES = ("SCA_PIPE", "cond1", "cond2", "cond3", "cond4", "debug", )
+    RETURN_TYPES = ("SCA_PIPE", )
+    RETURN_NAMES = ("SCA_PIPE", )
     CATEGORY = CATEGORY.MAIN.value + CATEGORY.ADVANCED.value
 
     FUNCTION = "determine_pipe_settings"
@@ -61,7 +60,7 @@ class AIO_Tuner_Pipe:
         return (positive1, positive2, positive3, positive4)
 
     def determine_pipe_settings(self, model_type, guidance, sampler_name, scheduler, steps, denoise: float,
-                                width, height, noise_seed, debug, model=None, positive=None, negative=None, vae=None, guider=None, sampler=None, sigmas=None,
+                                width, height, noise_seed, model=None, positive=None, negative=None, vae=None, guider=None, sampler=None, sigmas=None,
                                 extra_opts=None, samples=None):
         SCA_PIPE = []
         positive1 = "None"
@@ -92,10 +91,10 @@ class AIO_Tuner_Pipe:
             logger.info(f"Applying condition extra opts: {extra_opts}")
             positive = get_applycondsextraopts.apply_extra_opts(positive, extra_opts)[0]
             logger.info(f"Applied extra opts: {positive}")
-            if debug:
-                dbug = f"cond1: \n{positive}"
-                positive1, positive2, positive3, positive4 = self.debugreturn(positive, positive2, positive3, positive4)
-                return (SCA_PIPE, positive1, positive2, positive3, positive4, dbug)
+            #if debug:
+                #dbug = f"cond1: \n{positive}"
+                #positive1, positive2, positive3, positive4 = self.debugreturn(positive, positive2, positive3, positive4)
+                #return (SCA_PIPE, positive1, positive2, positive3, positive4, dbug)
         else:
             logger.info(f"Not applying condition extra opts")
 
