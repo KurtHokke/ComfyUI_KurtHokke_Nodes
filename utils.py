@@ -1,15 +1,37 @@
-'''
-    !DISCLAIMER! I'm very new to programming and I've been heavily inspired by following.
-https://github.com/crystian/ComfyUI-Crystools
-https://github.com/cubiq/ComfyUI_essentials
-  Many thanks goes to these awesome developers!
-'''
+import logging
 from enum import Enum
 import sys
 import configparser
 import os
 import contextlib
 import torch
+
+
+MODEL_TYPES = ["SDXL", "FLUX"]
+COND_DIRECTION = ["<", ">", "<", ">", "<", ">", "<", ">", "<", ">", "<", ">", "<", ">", "<", ">", "<", ">", "<", ">", "<", ">", "<", ">", "<", ">", "<", ">", "<", ">", "<", ">", "<", ">"]
+COND_OPTS = ["WAS_blend", "concat", "average", "combine"]
+
+
+
+logging.basicConfig(
+    level=logging.DEBUG,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+)
+logger = logging.getLogger(__name__)
+def log_function_call(func):
+    def wrapper(*args, **kwargs):
+        if len(args) > 0 and hasattr(args[0], '__class__'):
+            logger.info(
+                f"Calling classmethod {func.__name__} of {args[0].__class__.__name__} with args: {args} and kwargs: {kwargs}")
+        else:
+            logger.info(f"Calling {func.__name__} with args: {args} and kwargs: {kwargs}")
+
+        result = func(*args, **kwargs)
+        logger.info(f"{func.__name__} returned: {result}")
+        return result
+
+    return wrapper
+
 
 parent_dir = os.path.dirname(os.path.abspath(__file__))
 
@@ -190,6 +212,5 @@ def disable_load_models_gpu():
     with unittest.mock.patch.object(model_management, "load_models_gpu", foo):
         yield
 
-MODEL_TYPES = ["FLUX", "SDXL"]
-COND_DIRECTION = ["<", ">", "<", ">", "<", ">", "<", ">", "<", ">", "<", ">", "<", ">", "<", ">", "<", ">", "<", ">", "<", ">", "<", ">", "<", ">", "<", ">", "<", ">", "<", ">", "<", ">"]
-COND_OPTS = ["concat", "average", "combine"]
+
+

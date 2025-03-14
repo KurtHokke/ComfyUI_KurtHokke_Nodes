@@ -1,4 +1,4 @@
-from ..utils import CATEGORY, MODEL_TYPES
+from ..utils import CATEGORY, MODEL_TYPES, any, log_function_call, logger
 from comfy.comfy_types import *
 import node_helpers
 import comfy.samplers
@@ -13,11 +13,14 @@ import torch
 from PIL import Image, ImageOps, ImageSequence
 import numpy as np
 import logging
-from .cond import ConditioningProcessor
 
-'''
+def get_sigmas(model, scheduler, steps, denoise):
+    get_basicscheduler = BasicScheduler()
+    sigmas = get_basicscheduler.get_sigmas(model=model, scheduler=scheduler, steps=steps, denoise=denoise)[0]
+    return sigmas
+
 class AIO_Tuner_Pipe:
-
+    @log_function_call
     def __init__(self):
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -25,8 +28,6 @@ class AIO_Tuner_Pipe:
     def INPUT_TYPES(s):
         return {
             "required": {
-                "model": ("MODEL", ),
-                "positive": ("CONDITIONING", ),
                 "model_type": (MODEL_TYPES, ),
                 "guidance": ("FLOAT", {"default": 3.5, "min": 0.0, "max": 100.0, "step": 0.01}),
                 "sampler_name": (comfy.samplers.SAMPLER_NAMES, ),
@@ -39,6 +40,8 @@ class AIO_Tuner_Pipe:
                 "debug": ("BOOLEAN", {"default": False}),
             },
             "optional": {
+                "model": ("MODEL", ),
+                "positive": ("CONDITIONING", ),
                 "negative": ("CONDITIONING", ),
                 "vae": ("VAE", ),
                 "guider": ("GUIDER", ),
@@ -48,135 +51,131 @@ class AIO_Tuner_Pipe:
                 "extra_opts": ("EXTRA_OPTS", ),
             }
         }
-    RETURN_TYPES = ("SCA_PIPE", "CONDITIONING",)
+    RETURN_TYPES = ("SCA_PIPE", "CONDITIONING", "CONDITIONING", "CONDITIONING", "CONDITIONING", any)
+    RETURN_NAMES = ("SCA_PIPE", "cond1", "cond2", "cond3", "cond4", "debug", )
     CATEGORY = CATEGORY.MAIN.value + CATEGORY.ADVANCED.value
 
     FUNCTION = "determine_pipe_settings"
 
-    def get_latent(self, model_type, width, height, batch_size=1):
-        if model_type == "FLUX":
-            latent = torch.zeros([batch_size, 16, height // 8, width // 8], device=self.device)
-        elif model_type == "SDXL":
-            latent = torch.zeros([batch_size, 4, height // 8, width // 8], device=self.device)
-        else:
-            latent = torch.zeros([batch_size, 4, height // 8, width // 8], device=self.device)
-        return ({"samples":latent}, )
+    def debugreturn(self, positive1=None, positive2=None, positive3=None, positive4=None):
+        return (positive1, positive2, positive3, positive4)
 
-
-
-    def determine_pipe_settings(self, model, positive, model_type, guidance, sampler_name, scheduler, steps, denoise: float,
-                                width, height, noise_seed, debug, negative=None, vae=None, guider=None, sampler=None, sigmas=None,
+    def determine_pipe_settings(self, model_type, guidance, sampler_name, scheduler, steps, denoise: float,
+                                width, height, noise_seed, debug, model=None, positive=None, negative=None, vae=None, guider=None, sampler=None, sigmas=None,
                                 extra_opts=None, samples=None):
         SCA_PIPE = []
+        positive1 = "None"
+        positive2 = "None"
+        positive3 = "None"
+        positive4 = "None"
+
 
         if isinstance(denoise, float):
             denoise = str(denoise)
+
         if ',' not in denoise:
             float_denoise = float(denoise)
             noise = Noise_RandomNoise(noise_seed)
-
+            logger.info(f"Using random noise: {noise}")
             SCA_PIPE.append(noise)
         else:
             SCA_PIPE.append(noise_seed)
 
-        print(len(positive))
-        print(len(positive))
-
         if extra_opts == {}:
             extra_opts = None
-        if extra_opts is not None:
-            process_conds = ConditioningProcessor()
-
-            try:
-                affected_conds1 = [int(cond.strip()) - 1 for cond in extra_opts["affected_conds1"].split(",")]
-                if "affected_conds2" in extra_opts:
-                    affected_conds2 = [int(cond.strip()) - 1 for cond in extra_opts["affected_conds2"].split(",")]
-                else:
-                    affected_conds2 = None
-
-                if "combine1" in extra_opts:
-                    positive = process_conds.combine(positive[affected_conds1[0]], positive[affected_conds1[1]])[0]
-
-                elif "concat1" in extra_opts:
-                    if extra_opts["direction1"] == '<':
-                        positive = process_conds.concat(positive[affected_conds1[0]], positive[affected_conds1[1]])
-                    elif extra_opts["direction1"] == '>':
-                        positive = process_conds.concat(positive[affected_conds1[1]], positive[affected_conds1[0]])[0]
-
-                elif "average1" in extra_opts:
-                    if extra_opts["direction1"] == '<':
-                        positive = process_conds.addWeighted(positive[affected_conds1[0]], positive[affected_conds1[1]], extra_opts["average_strength1"])[0]
-                    elif extra_opts["direction1"] == '>':
-                        positive = process_conds.addWeighted(positive[affected_conds1[1]], positive[affected_conds1[0]], extra_opts["average_strength1"])[0]
-
-                if affected_conds2 is not None:
-                    if "combine2" in extra_opts:
-                        positive = process_conds.combine(positive[affected_conds2[0]], positive[affected_conds2[1]])[0]
-
-                    elif "concat2" in extra_opts:
-                        if extra_opts["direction2"] == '<':
-                            positive = process_conds.concat(positive[affected_conds2[0]], positive[affected_conds2[1]])[0]
-                        elif extra_opts["direction2"] == '>':
-                            positive = process_conds.concat(positive[affected_conds2[1]], positive[affected_conds2[0]])[0]
-
-                    elif "average2" in extra_opts:
-                        if extra_opts["direction2"] == '<':
-                            positive = process_conds.addWeighted(positive[affected_conds2[0]], positive[affected_conds2[1]], extra_opts["average_strength2"])[0]
-                        elif extra_opts["direction2"] == '>':
-                            positive = process_conds.addWeighted(positive[affected_conds2[1]], positive[affected_conds2[0]], extra_opts["average_strength2"])[0]
-
-
-
-            except Exception as e:
-                print(f"Error while processing extra_opts: {e}")
-                pass
+        if extra_opts is not None and "cond" in extra_opts and len(positive) == 2:
+            from ..nodes.cond import ApplyCondsExtraOpts
+            get_applycondsextraopts = ApplyCondsExtraOpts()
+            if "seed1" not in extra_opts:
+                extra_opts5 = {"seed1": noise_seed}
+                extra_opts = {**extra_opts, **extra_opts5}
+            logger.info(f"Applying condition extra opts: {extra_opts}")
+            positive = get_applycondsextraopts.apply_extra_opts(positive, extra_opts)[0]
+            logger.info(f"Applied extra opts: {positive}")
+            if debug:
+                dbug = f"cond1: \n{positive}"
+                positive1, positive2, positive3, positive4 = self.debugreturn(positive, positive2, positive3, positive4)
+                return (SCA_PIPE, positive1, positive2, positive3, positive4, dbug)
         else:
-            positive = positive[0]
-        def flatten(nested_list):
-            result = []
-            for sublist in nested_list:
-                for item in sublist:
-                    result.append(item)
-            return result
-        positive = flatten(positive)
-        if debug:
-            return (SCA_PIPE, positive, )
+            logger.info(f"Not applying condition extra opts")
+
         if guider is None:
-            get_BasicGuider = BasicGuider()
-            get_CFGGuider = CFGGuider()
+            get_basicguider = BasicGuider()
+            get_cfgguider = CFGGuider()
             if model_type == "FLUX":
-                get_FluxGuidance = FluxGuidance()
+                get_fluxguidance = FluxGuidance()
                 if negative is None:
-                    positive = get_FluxGuidance.append(conditioning=positive, guidance=guidance)[0]
-                    guider = get_BasicGuider.get_guider(model=model, conditioning=positive)[0]
+                    positive = get_fluxguidance.append(conditioning=positive, guidance=guidance)[0]
+                    guider = get_basicguider.get_guider(model=model, conditioning=positive)[0]
                 else:
-                    positive = get_FluxGuidance.append(conditioning=positive, guidance=guidance)[0]
-                    negative = get_FluxGuidance.append(conditioning=negative, guidance=guidance)[0]
-                    guider = get_CFGGuider.get_guider(model=model, positive=positive, negative=negative, cfg=1)[0]
+                    positive = get_fluxguidance.append(conditioning=positive, guidance=guidance)[0]
+                    negative = get_fluxguidance.append(conditioning=negative, guidance=guidance)[0]
+                    guider = get_cfgguider.get_guider(model=model, positive=positive, negative=negative, cfg=1)[0]
             elif model_type == "SDXL":
-                if negative is None:
-                    guider = get_BasicGuider.get_guider(model=model, conditioning=positive)[0]
+                if extra_opts is not None and "schedule_cfg1" in extra_opts:
+                    import importlib
+                    module_name = 'custom_nodes.comfyui-inspire-pack.inspire.sampler_nodes'
+                    inspire_pack_module = importlib.import_module(module_name)
+                    ScheduledCFGGuider = inspire_pack_module.ScheduledCFGGuider
+                    schedule_cfg1 = extra_opts["schedule_cfg1"]
+                    from_cfg1 = extra_opts["from_cfg1"]
+                    to_cfg1 = extra_opts["to_cfg1"]
+                    logger.info(f"Using schedule_cfg:\n{schedule_cfg1}\n{from_cfg1}\n{to_cfg1}")
+                    sigmas1 = get_sigmas(model=model, scheduler=scheduler, steps=steps, denoise=float_denoise)
+                    logger.info(f"Using schedule_cfg sigmas:\n{sigmas1}")
+                    if negative is None:
+                        from nodes import ConditioningZeroOut
+                        get_zero_out = ConditioningZeroOut()
+                        neg_copy = positive.copy()
+                        negative = get_zero_out.zero_out(neg_copy)[0]
+                        logger.info(f"Using node's zeroed out conditioning:\n{negative}")
+                    guider = ScheduledCFGGuider.get_guider(self, model=model, positive=positive, negative=negative, sigmas=sigmas1, from_cfg=from_cfg1, to_cfg=to_cfg1, schedule=schedule_cfg1)[0]
+                    logger.info(f"Using schedule_cfg guider, sigmas:\n{guider}")
+
+                elif negative is None and extra_opts is not None and "modify_pos_cfg1" in extra_opts:
+                    noneg_cfg = extra_opts["modify_pos_cfg1"]
+                    logger.info(f"Using external noneg_cfg: {noneg_cfg}")
+                    from nodes import ConditioningZeroOut
+                    get_zero_out = ConditioningZeroOut()
+                    neg_copy = positive.copy()
+                    negative = get_zero_out.zero_out(neg_copy)[0]
+                    logger.info(f"Using node's zeroed out conditioning:\n{negative}")
+                    guider = get_cfgguider.get_guider(model=model, positive=positive, negative=negative, cfg=noneg_cfg)[0]
+                    logger.info(f"noneg with cfg guider:\n{guider}")
+                elif negative is None:
+                    guider = get_basicguider.get_guider(model=model, conditioning=positive)[0]
+                    logger.info(f"Using node's guider: {guider}")
                 else:
-                    guider = get_CFGGuider.get_guider(model=model, positive=positive, negative=negative, cfg=guidance)[0]
+                    guider = get_cfgguider.get_guider(model=model, positive=positive, negative=negative, cfg=guidance)[0]
+                    logger.info(f"Using node's guider: {guider}")
             else:
                 if negative is None:
-                    guider = get_BasicGuider.get_guider(model=model, conditioning=positive)[0]
+                    guider = get_basicguider.get_guider(model=model, conditioning=positive)[0]
                 else:
-                    guider = get_CFGGuider.get_guider(model=model, positive=positive, negative=negative, cfg=guidance)[0]
-        
+                    guider = get_cfgguider.get_guider(model=model, positive=positive, negative=negative, cfg=guidance)[0]
+                logger.info(f"FALLBACK!!!:\n{guider}")
+
+            logger.info(f"Using node's guider: {guider}")
+        else:
+            logger.info(f"Using external guider: {guider}")
+
         SCA_PIPE.append(guider)
 
 
         if sampler is None:
             sampler = comfy.samplers.sampler_object(sampler_name)
-
+            logger.info(f"Using node's sampler: {sampler}")
+        else:
+            logger.info(f"Using external sampler: {sampler}")
         SCA_PIPE.append(sampler)
-
 
         if ',' not in denoise:
             if sigmas is None:
-                get_BasicScheduler = BasicScheduler()
-                sigmas = get_BasicScheduler.get_sigmas(model=model, scheduler=scheduler, steps=steps, denoise=float_denoise)[0]
+                get_basicscheduler = BasicScheduler()
+                sigmas = get_basicscheduler.get_sigmas(model=model, scheduler=scheduler, steps=steps, denoise=float_denoise)[0]
+                logger.info(f"Using node's scheduler: {sigmas}")
+            else:
+                logger.info(f"Using external scheduler: {sigmas}")
 
             SCA_PIPE.append(sigmas)
         else:
@@ -184,9 +183,40 @@ class AIO_Tuner_Pipe:
 
 
         if samples is None:
-            latent = self.get_latent(model_type, width=width, height=height, batch_size=1)[0]
+            if extra_opts is not None:
+                if "batch_size" in extra_opts:
+                    batch_size = extra_opts["batch_size"]
+                    if "width" in extra_opts and "height" in extra_opts:
+                        width = extra_opts["width"]
+                        height = extra_opts["height"]
+                        logger.info(f"Using extra opts batch size: {batch_size}")
+                        logger.info(f"Using extra opts width: {width}")
+                        logger.info(f"Using extra opts height: {height}")
+                    else:
+                        logger.info(f"Using extra opts batch size: {batch_size}")
+                else:
+                    batch_size = 1
+                    logger.info(f"Using default batch size: {batch_size}")
+            else:
+                batch_size = 1
+                logger.info(f"Using default batch size: {batch_size}")
+
+            if model_type == "FLUX":
+                from comfy_extras.nodes_sd3 import EmptySD3LatentImage
+                get_emptysd3latentimage = EmptySD3LatentImage()
+                latent = get_emptysd3latentimage.generate(width, height, batch_size)[0]
+                logger.info(f"Using node's FLUX latent generator: {latent["samples"].shape}")
+            else:
+                from nodes import EmptyLatentImage
+                get_emptylatentimage = EmptyLatentImage()
+                latent = get_emptylatentimage.generate(width, height, batch_size)[0]
+                logger.info(f"Using node's SDXL latent generator: {latent["samples"].shape}")
         else:
             latent = samples
+            logger.info(f"Using external latent: {latent["samples"].shape}")
+
+        if extra_opts is None:
+            extra_opts = {}
 
         SCA_PIPE.append(latent)
         SCA_PIPE.append(vae)
@@ -197,8 +227,8 @@ class AIO_Tuner_Pipe:
             SCA_PIPE.append(denoise)
             SCA_PIPE.append(steps)
 
-        return (SCA_PIPE, positive)
-'''
+        return (SCA_PIPE, )
+
 
 class SamplerCustomAdvanced_Pipe:
     def __init__(self):
@@ -221,11 +251,8 @@ class SamplerCustomAdvanced_Pipe:
 
     def decode(self, vae, samples):
         images = vae.decode(samples["samples"])[0]
-        # print(i)  # To check what `i` is
-        # print(type(i))  # To see its type
-        # print(i.shape)
 
-        if len(images.shape) == 5: #Combine batches
+        if len(images.shape) == 5:
             images = images.reshape(-1, images.shape[-3], images.shape[-2], images.shape[-1])
         return (images, )
 
@@ -244,7 +271,7 @@ class SamplerCustomAdvanced_Pipe:
 
         compression = vae.spacial_compression_decode()
         images = vae.decode_tiled(samples["samples"], tile_x=tile_size // compression, tile_y=tile_size // compression, overlap=overlap // compression, tile_t=temporal_size, overlap_t=temporal_overlap)[0]
-        if len(images.shape) == 5: #Combine batches
+        if len(images.shape) == 5:
             images = images.reshape(-1, images.shape[-3], images.shape[-2], images.shape[-1])
         return (images, )
 
@@ -285,205 +312,7 @@ class SamplerCustomAdvanced_Pipe:
         return (images, out, )
 
 
-class AIO_Tuner_Pipe:
 
-    def __init__(self):
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-    @classmethod
-    def INPUT_TYPES(s):
-        return {
-            "required": {
-                "model": ("MODEL", ),
-                "positive": ("CONDITIONING", ),
-                "model_type": (MODEL_TYPES, ),
-                "guidance": ("FLOAT", {"default": 3.5, "min": 0.0, "max": 100.0, "step": 0.01}),
-                "sampler_name": (comfy.samplers.SAMPLER_NAMES, ),
-                "scheduler": (comfy.samplers.SCHEDULER_NAMES, ),
-                "steps": ("INT", {"default": 20, "min": 1, "max": 10000}),
-                "denoise": ("FLOAT", {"default": "1"}),
-                "width": ("INT", {"default": 1024, "min": 16, "max": MAX_RESOLUTION, "step": 16}),
-                "height": ("INT", {"default": 1024, "min": 16, "max": MAX_RESOLUTION, "step": 16}),
-                "noise_seed": ("INT", {"default": 0, "min": 0, "max": 0xffffffffffffffff}),
-            },
-            "optional": {
-                "negative": ("CONDITIONING", ),
-                "vae": ("VAE", ),
-                "guider": ("GUIDER", ),
-                "sampler": ("SAMPLER", ),
-                "sigmas": ("SIGMAS", ),
-                "samples": ("LATENT", ),
-                "extra_opts": ("EXTRA_OPTS", ),
-            }
-        }
-    RETURN_TYPES = ("SCA_PIPE", )
-    CATEGORY = CATEGORY.MAIN.value + CATEGORY.ADVANCED.value
-
-    FUNCTION = "determine_pipe_settings"
-
-    def addWeighted(self, conditioning_to, conditioning_from, conditioning_to_strength):
-        out = []
-        if len(conditioning_from) > 1:
-            logging.warning("Warning: ConditioningAverage conditioning_from contains more than 1 cond, only the first one will actually be applied to conditioning_to.")
-        cond_from = conditioning_from[0][0]
-        pooled_output_from = conditioning_from[0][1].get("pooled_output", None)
-
-        for i in range(len(conditioning_to)):
-            t1 = conditioning_to[i][0]
-            pooled_output_to = conditioning_to[i][1].get("pooled_output", pooled_output_from)
-            t0 = cond_from[:,:t1.shape[1]]
-            if t0.shape[1] < t1.shape[1]:
-                t0 = torch.cat([t0] + [torch.zeros((1, (t1.shape[1] - t0.shape[1]), t1.shape[2]))], dim=1)
-
-            tw = torch.mul(t1, conditioning_to_strength) + torch.mul(t0, (1.0 - conditioning_to_strength))
-            t_to = conditioning_to[i][1].copy()
-            if pooled_output_from is not None and pooled_output_to is not None:
-                t_to["pooled_output"] = torch.mul(pooled_output_to, conditioning_to_strength) + torch.mul(pooled_output_from, (1.0 - conditioning_to_strength))
-            elif pooled_output_from is not None:
-                t_to["pooled_output"] = pooled_output_from
-
-            n = [tw, t_to]
-            out.append(n)
-        return (out, )
-
-    def concat(self, conditioning_to, conditioning_from):
-        out = []
-        print(conditioning_from)
-        print(conditioning_to)
-        if len(conditioning_from) > 1:
-            logging.warning("Warning: ConditioningConcat conditioning_from contains more than 1 cond, only the first one will actually be applied to conditioning_to.")
-
-        cond_from = conditioning_from[0][0]
-        print(cond_from)
-        for i in range(len(conditioning_to)):
-            t1 = conditioning_to[i][0]
-            print(t1)
-            tw = torch.cat((t1, cond_from),1)
-            print(tw)
-            n = [tw, conditioning_to[i][1].copy()]
-            print(n)
-            out.append(n)
-            print(out)
-        return (out, )
-
-    def combine(self, conditioning):
-        if len(conditioning) > 1:
-        # Initialize the combined result (assuming tuples for this example)
-            combined = conditioning[0]
-
-            # Loop through remaining items and combine them
-            for item in conditioning[1:]:
-                # Depending on your requirements, you can define the combination logic
-                combined += item
-
-            return (combined,)
-
-    def get_latent(self, model_type, width, height, batch_size=1):
-        if model_type == "FLUX":
-            latent = torch.zeros([batch_size, 16, height // 8, width // 8], device=self.device)
-        elif model_type == "SDXL":
-            latent = torch.zeros([batch_size, 4, height // 8, width // 8], device=self.device)
-        else:
-            latent = torch.zeros([batch_size, 4, height // 8, width // 8], device=self.device)
-        return ({"samples":latent}, )
-
-    def determine_pipe_settings(self, model, positive, model_type, guidance, sampler_name, scheduler, steps, denoise: float,
-                                width, height, noise_seed, negative=None, vae=None, guider=None, sampler=None, sigmas=None,
-                                extra_opts=None, samples=None):
-        get_FluxGuidance = FluxGuidance()
-        get_BasicGuider = BasicGuider()
-        get_CFGGuider = CFGGuider()
-        get_BasicScheduler = BasicScheduler()
-
-
-        SCA_PIPE = []
-
-        if isinstance(denoise, float):
-        # Convert float to string for consistent checking
-            denoise = str(denoise)
-
-
-        if ',' not in denoise:
-            float_denoise = float(denoise)
-            noise = Noise_RandomNoise(noise_seed)
-
-            SCA_PIPE.append(noise)
-        else:
-            SCA_PIPE.append(noise_seed)
-
-        print(len(positive))
-        print(len(positive))
-        print(len(positive))
-        print(len(positive))
-
-        if extra_opts is not None:
-            if "combine" in extra_opts:
-                positive = self.combine(conditioning=positive)[0]
-            elif "concat" in extra_opts:
-                if extra_opts["concat_where"] == '<':
-                    positive = self.concat(conditioning_to=positive[0], conditioning_from=positive[1])[0]
-                elif extra_opts["concat_where"] == '>':
-                    positive = self.concat(conditioning_to=positive[1], conditioning_from=positive[0])[0]
-            elif "average" in extra_opts:
-                positive = self.addWeighted(conditioning_to=positive[0], conditioning_from=positive[1], conditioning_to_strength=extra_opts["average_strength"])[0]
-            else:
-                positive = positive[0]
-        else:
-            positive = positive[0]
-
-        if guider is None:
-            if model_type == "FLUX":
-                if negative is None:
-                    positive = get_FluxGuidance.append(conditioning=positive, guidance=guidance)[0]
-                    guider = get_BasicGuider.get_guider(model=model, conditioning=positive)[0]
-                else:
-                    positive = get_FluxGuidance.append(conditioning=positive, guidance=guidance)[0]
-                    negative = get_FluxGuidance.append(conditioning=negative, guidance=guidance)[0]
-                    guider = get_CFGGuider.get_guider(model=model, positive=positive, negative=negative, cfg=1)[0]
-            elif model_type == "SDXL":
-                if negative is None:
-                    guider = get_BasicGuider.get_guider(model=model, conditioning=positive)
-                else:
-                    guider = get_CFGGuider.get_guider(model=model, positive=positive, negative=negative, cfg=guidance)[0]
-            else:
-                if negative is None:
-                    guider = get_BasicGuider.get_guider(model=model, conditioning=positive)[0]
-                else:
-                    guider = get_CFGGuider.get_guider(model=model, positive=positive, negative=negative, cfg=guidance)[0]
-
-        SCA_PIPE.append(guider)
-
-
-        if sampler is None:
-            sampler = comfy.samplers.sampler_object(sampler_name)
-
-        SCA_PIPE.append(sampler)
-
-
-        if ',' not in denoise:
-            if sigmas is None:
-                sigmas = get_BasicScheduler.get_sigmas(model=model, scheduler=scheduler, steps=steps, denoise=float_denoise)[0]
-
-            SCA_PIPE.append(sigmas)
-        else:
-            SCA_PIPE.append(scheduler)
-
-
-        if samples is None:
-            latent = self.get_latent(model_type, width=width, height=height, batch_size=1)[0]
-        else:
-            latent = samples
-
-        SCA_PIPE.append(latent)
-        SCA_PIPE.append(vae)
-        SCA_PIPE.append(extra_opts)
-
-        if ',' in denoise:
-            SCA_PIPE.append(model)
-            SCA_PIPE.append(denoise)
-            SCA_PIPE.append(steps)
-
-        return (SCA_PIPE, )
 
 '''
 class FluxGuidance:

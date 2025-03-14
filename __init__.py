@@ -1,14 +1,14 @@
 
 from .utils import CATEGORY
-from .nodes.util_nodes import Node_BOOL, Node_INT, Node_Float, Node_String, Node_StringMultiline
+from .nodes.util_nodes import Node_BOOL, Node_INT, Node_Float, Node_String, Node_StringMultiline, Node_RandomRange
 from .nodes.pipe import BooleanToPipe, BooleanFromPipe
 from .nodes.math import ExpMath, ExpMathDual, ExpMathQuad
 from .nodes.misc import EmptyLatentSize, EmptyLatentSize64, SchedulerSel, SamplerSel, LoraFluxParams
 from .nodes.models import LoadUnetAndClip, UnetClipLoraLoader, UnetClipLoraLoaderBasic, CkptPipe, ModelPipe1, ModelPipe2
 from .nodes.tuning import SamplerCustomAdvanced_Pipe, AIO_Tuner_Pipe
-from .nodes.extraopts import MergeExtraOpts, VAE_ExtraOpts, COND_ExtraOpts
+from .nodes.extraopts import MergeExtraOpts, VAE_ExtraOpts, COND_ExtraOpts, batchsize_ExtraOpts, SEED_ExtraOpts, NoNegExtraOpts, COND_ExtraOpts_2
 from .nodes.custom_nodes__sd_dynamic_thresholding import DynamicThresholding, DynamicThresholdingBasic
-from .nodes.cond import ChainTextEncode, mycombine
+from .nodes.cond import ChainTextEncode, mycombine, splitcond, ApplyCondsExtraOpts
 from .nodes.pysed import SedOnString
 from .nodes.pyre import re_sub_str
 from .nodes.str_manipulation import str_str, str_str_str_str
@@ -27,6 +27,7 @@ NODE_CLASS_MAPPINGS = {
     "Node_Float": Node_Float,
     "Node_String": Node_String,
     "Node_StringMultiline": Node_StringMultiline,
+    "Node_RandomRange": Node_RandomRange,
     "BooleanToPipe": BooleanToPipe,
     "BooleanFromPipe": BooleanFromPipe,
     "ExpMath": ExpMath,
@@ -48,6 +49,10 @@ NODE_CLASS_MAPPINGS = {
     "MergeExtraOpts": MergeExtraOpts,
     "VAE_ExtraOpts": VAE_ExtraOpts,
     "COND_ExtraOpts": COND_ExtraOpts,
+    "COND_ExtraOpts_2": COND_ExtraOpts_2,
+    "batchsize_ExtraOpts": batchsize_ExtraOpts,
+    "SEED_ExtraOpts": SEED_ExtraOpts,
+    "NoNegExtraOpts": NoNegExtraOpts,
     "DynamicThresholding": DynamicThresholding,
     "DynamicThresholdingBasic": DynamicThresholdingBasic,
     "ChainTextEncode": ChainTextEncode,
@@ -60,8 +65,9 @@ NODE_CLASS_MAPPINGS = {
     "ExecutePythonNode": ExecutePythonNode,
     "BashScriptNode": BashScriptNode,
     "mycombine": mycombine,
+    "splitcond": splitcond,
+    "ApplyCondsExtraOpts": ApplyCondsExtraOpts,
 }
-
 
 NODE_DISPLAY_NAME_MAPPINGS = {
     "Node_BOOL": prefix + "BOOL",
@@ -69,6 +75,7 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "Node_Float": prefix + "Float",
     "Node_String": prefix + "String",
     "Node_StringMultiline": prefix + "StringMultiline",
+    "Node_RandomRange": prefix + "RandomRange",
     "BooleanToPipe": prefix + "BooleanToPipe",
     "BooleanFromPipe": prefix + "BooleanFromPipe",
     "ExpMath": prefix + "ExpMath",
@@ -90,6 +97,10 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "MergeExtraOpts": prefix + "MergeExtraOpts",
     "VAE_ExtraOpts": prefix + "VAE_ExtraOpts",
     "COND_ExtraOpts": prefix + "COND_ExtraOpts",
+    "COND_ExtraOpts_2": prefix + "COND_ExtraOpts_2",
+    "batchsize_ExtraOpts": prefix + "batchsize_ExtraOpts",
+    "SEED_ExtraOpts": prefix + "SEED_ExtraOpts",
+    "NoNegExtraOpts": prefix + "NoNegExtraOpts",
     "DynamicThresholding": prefix + "DynamicThresholding",
     "DynamicThresholdingBasic": prefix + "DynamicThresholdingBasic",
     "ChainTextEncode": prefix + "ChainTextEncode",
@@ -102,6 +113,8 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "ExecutePythonNode": prefix + "ExecutePythonNode",
     "BashScriptNode": prefix + "BashScriptNode",
     "mycombine": prefix + "mycombine",
+    "splitcond": prefix + "splitcond",
+    "ApplyCondsExtraOpts": prefix + "ApplyCondsExtraOpts",
 }
 
 __all__ = ["NODE_CLASS_MAPPINGS", "NODE_DISPLAY_NAME_MAPPINGS", "WEB_DIRECTORY"]

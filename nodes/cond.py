@@ -1,5 +1,6 @@
-from ..utils import CATEGORY
+from ..utils import CATEGORY, logger
 from comfy.comfy_types import IO, ComfyNodeABC, InputTypeDict
+import random
 import torch
 import logging
 
@@ -37,68 +38,100 @@ Combines multiple conditioning nodes into one
                 cond = cond_concat_node.concat(cond, new_cond)[0]
         return (cond, inputcount,)
 
-class ConditioningProcessor:
 
-    def addWeighted(self, conditioning_to, conditioning_from, conditioning_to_strength):
-        out = []
-        if len(conditioning_from) > 1:
-            logging.warning("Warning: ConditioningAverage conditioning_from contains more than 1 cond, only the first one will actually be applied to conditioning_to.")
-        cond_from = conditioning_from[0][0]
-        pooled_output_from = conditioning_from[0][1].get("pooled_output", None)
+class splitcond:
+    @classmethod
+    def INPUT_TYPES(s):
+        return {
+            "required": {
+                "conditioning": ("CONDITIONING", ),
+            },
+        }
+    RETURN_TYPES = ("CONDITIONING", "CONDITIONING")
+    RETURN_NAMES = ("cond1", "cond2")
+    FUNCTION = "split"
+    CATEGORY = CATEGORY.MAIN.value + CATEGORY.CONDITIONING.value
 
-        for i in range(len(conditioning_to)):
-            t1 = conditioning_to[i][0]
-            pooled_output_to = conditioning_to[i][1].get("pooled_output", pooled_output_from)
-            t0 = cond_from[:,:t1.shape[1]]
-            if t0.shape[1] < t1.shape[1]:
-                t0 = torch.cat([t0] + [torch.zeros((1, (t1.shape[1] - t0.shape[1]), t1.shape[2]))], dim=1)
-
-            tw = torch.mul(t1, conditioning_to_strength) + torch.mul(t0, (1.0 - conditioning_to_strength))
-            t_to = conditioning_to[i][1].copy()
-            if pooled_output_from is not None and pooled_output_to is not None:
-                t_to["pooled_output"] = torch.mul(pooled_output_to, conditioning_to_strength) + torch.mul(pooled_output_from, (1.0 - conditioning_to_strength))
-            elif pooled_output_from is not None:
-                t_to["pooled_output"] = pooled_output_from
-
-            n = [tw, t_to]
-            out.append(n)
-        return (out, )
+    def split(self, conditioning):
+        cond1 = [conditioning[0]]
+        cond2 = conditioning[1]
+        return (cond1, cond2)
 
 
-    def concat(self, conditioning_to, conditioning_from):
-        out = []
-        print(conditioning_from)
-        print(conditioning_to)
-        if len(conditioning_from) > 1:
-            logging.warning("Warning: ConditioningConcat conditioning_from contains more than 1 cond, only the first one will actually be applied to conditioning_to.")
+class ApplyCondsExtraOpts:
+    @classmethod
+    def INPUT_TYPES(s):
+        return {
+            "required": {
+                "conditioning": ("CONDITIONING", ),
+                "extra_opts": ("EXTRA_OPTS", ),
+            },
+        }
+    RETURN_TYPES = ("CONDITIONING",)
+    FUNCTION = "apply_extra_opts"
+    CATEGORY = CATEGORY.MAIN.value + CATEGORY.CONDITIONING.value
 
-        cond_from = conditioning_from[0][0]
-        print(cond_from)
-        for i in range(len(conditioning_to)):
-            t1 = conditioning_to[i][0]
-            print(t1)
-            tw = torch.cat((t1, cond_from),1)
-            print(tw)
-            n = [tw, conditioning_to[i][1].copy()]
-            print(n)
-            out.append(n)
-            print(out)
-        return (out, )
+    def apply_extra_opts(self, conditioning, extra_opts):
+        if len(conditioning) != 2:
+            return conditioning
+        else:
+            if extra_opts is not None and "cond" in extra_opts:
+                if "cond_direction1" in extra_opts and extra_opts["cond_direction1"] == '<':
+                    conditioning1 = [conditioning[0]]
+                    conditioning2 = conditioning[1]
+                    logger.info(f"<: {conditioning1}\n{conditioning2}")
+                elif "cond_direction1" in extra_opts and extra_opts["cond_direction1"] == '>':
+                    conditioning1 = conditioning[1]
+                    conditioning2 = [conditioning[0]]
+                    logger.info(f">: {conditioning1}\n{conditioning2}")
+                else:
+                    conditioning1 = [conditioning[0]]
+                    conditioning2 = conditioning[1]
+                    logger.info(f"<>: {conditioning1}\n{conditioning2}")
 
-    def combine(self, conditioning_1, conditioning_2):
-        return (conditioning_1 + conditioning_2, )
+                if "WAS_blend1" in extra_opts:
+                    from custom_nodes.was_extras.ConditioningBlend import WAS_ConditioningBlend
+                    get_blend = WAS_ConditioningBlend()
+                    if "WAS_blend_mode1" in extra_opts and "strength1" in extra_opts:
+                        blend_mode = extra_opts["WAS_blend_mode1"]
+                        strength = extra_opts["strength1"]
+                        logger.info(f"blend_mode: {blend_mode}\nblend_strength: {strength}")
+                    else:
+                        logger.info(f"WAS_blend_mode not found in\n{extra_opts}")
+                        return conditioning
 
-    '''
-    def combine(self, conditioning):
-        if len(conditioning) > 1:
-            combined = conditioning[0]
+                    if "seed1" in extra_opts:
+                        seed = extra_opts["seed1"]
+                        logger.info(f"seed: {seed}")
+                    else:
+                        seed = random.randint(0, 0xffffffffffffffff)
+                        logger.info(f"seed not in extra opts, generating random seed:\n{seed}")
+                    conditioning_WAS_blend = get_blend.combine(conditioning1, conditioning2, blend_mode, strength, seed=int(seed))[0]
+                    conditioning = [conditioning_WAS_blend,]
 
-            for item in conditioning[1:]:
-                # Depending on your requirements, you can define the combination logic
-                combined += item
+                if "combine1" in extra_opts:
+                    from nodes import ConditioningCombine
+                    cond_combine = ConditioningCombine()
+                    conditioning_combined = cond_combine.combine(conditioning1, conditioning2)[0]
+                    conditioning = [conditioning_combined,]
 
-            return (combined,)
-    '''
+                elif "concat1" in extra_opts:
+                    from nodes import ConditioningConcat
+                    cond_concat = ConditioningConcat()
+                    conditioning_concatenated = cond_concat.concat(conditioning1, conditioning2)[0]
+                    conditioning = [conditioning_concatenated,]
+
+                elif "average1" in extra_opts:
+                    from nodes import ConditioningAverage
+                    cond_average = ConditioningAverage()
+                    strength = extra_opts["strength1"]
+                    conditioning_averaged = cond_average.addWeighted(conditioning1, conditioning2, strength)[0]
+                    conditioning = [conditioning_averaged,]
+
+                return conditioning
+            else:
+                print(f"extra_opts: {extra_opts} is not a valid input for this node.")
+                return conditioning
 
 
 class ChainTextEncode(ComfyNodeABC):
@@ -125,10 +158,10 @@ class ChainTextEncode(ComfyNodeABC):
         tokens = clip.tokenize(text)
         cond = clip.encode_from_tokens_scheduled(tokens)
         if prev_cond is None:
-            prev_cond = []
+            prev_cond = cond
         else:
             prev_cond = prev_cond.copy()
-        prev_cond.append(cond)
+            prev_cond.append(cond)
         return (clip, prev_cond, )
 
 

@@ -1,3 +1,4 @@
+import comfy
 from ..utils import CATEGORY
 
 class Node_BOOL:
@@ -77,3 +78,24 @@ class Node_StringMultiline:
 
     def stringify(self, string):
         return (string, )
+
+class Node_RandomRange:
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "min": ("FLOAT", {"default": 0.00, "min": -9999999999.00, "max": 9999999999.00, "step": 0.001}),
+                "max": ("FLOAT", {"default": 10.00, "min": -9999999999.00, "max": 9999999999.00, "step": 0.001}),
+            }
+        }
+    RETURN_TYPES = ("INT", "FLOAT")
+    FUNCTION = "randomrange"
+    OUTPUT_NODE = True
+    IS_CHANGED = True
+    CATEGORY = CATEGORY.MAIN.value + CATEGORY.UTILS.value
+
+    def randomrange(self, min, max):
+        import random
+        random_float = random.uniform(min, max)
+        random_int = int(random_float)
+        return random_int, random_float
