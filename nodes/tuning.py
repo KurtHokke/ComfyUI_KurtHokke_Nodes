@@ -86,8 +86,8 @@ class AIO_Tuner_Pipe:
         if extra_opts is not None and "cond" in extra_opts and len(positive) == 2:
             from ..nodes.cond import ApplyCondsExtraOpts
             get_applycondsextraopts = ApplyCondsExtraOpts()
-            if "seed1" not in extra_opts:
-                extra_opts5 = {"seed1": noise_seed}
+            if "seed" not in extra_opts:
+                extra_opts5 = {"seed": noise_seed}
                 extra_opts = {**extra_opts, **extra_opts5}
             logger.info(f"Applying condition extra opts: {extra_opts}")
             positive = get_applycondsextraopts.apply_extra_opts(positive, extra_opts)[0]
@@ -112,14 +112,18 @@ class AIO_Tuner_Pipe:
                     negative = get_fluxguidance.append(conditioning=negative, guidance=guidance)[0]
                     guider = get_cfgguider.get_guider(model=model, positive=positive, negative=negative, cfg=1)[0]
             elif model_type == "SDXL":
-                if extra_opts is not None and "schedule_cfg1" in extra_opts:
+                if extra_opts is not None and "schedule_cfg" in extra_opts:
                     import importlib
-                    module_name = 'custom_nodes.comfyui-inspire-pack.inspire.sampler_nodes'
-                    inspire_pack_module = importlib.import_module(module_name)
+                    try:
+                        module_name = 'custom_nodes.comfyui-inspire-pack.inspire.sampler_nodes'
+                        inspire_pack_module = importlib.import_module(module_name)
+                    except:
+                        module_name = 'custom_nodes.ComfyUI-Inspire-Pack.inspire.sampler_nodes'
+                        inspire_pack_module = importlib.import_module(module_name)
                     ScheduledCFGGuider = inspire_pack_module.ScheduledCFGGuider
-                    schedule_cfg1 = extra_opts["schedule_cfg1"]
-                    from_cfg1 = extra_opts["from_cfg1"]
-                    to_cfg1 = extra_opts["to_cfg1"]
+                    schedule_cfg1 = extra_opts["schedule_cfg"]
+                    from_cfg1 = extra_opts["from_cfg"]
+                    to_cfg1 = extra_opts["to_cfg"]
                     logger.info(f"Using schedule_cfg:\n{schedule_cfg1}\n{from_cfg1}\n{to_cfg1}")
                     sigmas1 = get_sigmas(model=model, scheduler=scheduler, steps=steps, denoise=float_denoise)
                     logger.info(f"Using schedule_cfg sigmas:\n{sigmas1}")
@@ -132,8 +136,8 @@ class AIO_Tuner_Pipe:
                     guider = ScheduledCFGGuider.get_guider(self, model=model, positive=positive, negative=negative, sigmas=sigmas1, from_cfg=from_cfg1, to_cfg=to_cfg1, schedule=schedule_cfg1)[0]
                     logger.info(f"Using schedule_cfg guider, sigmas:\n{guider}")
 
-                elif negative is None and extra_opts is not None and "modify_pos_cfg1" in extra_opts:
-                    noneg_cfg = extra_opts["modify_pos_cfg1"]
+                elif negative is None and extra_opts is not None and "modify_pos_cfg" in extra_opts:
+                    noneg_cfg = extra_opts["modify_pos_cfg"]
                     logger.info(f"Using external noneg_cfg: {noneg_cfg}")
                     from nodes import ConditioningZeroOut
                     get_zero_out = ConditioningZeroOut()

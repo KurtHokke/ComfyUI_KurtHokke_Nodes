@@ -11,13 +11,17 @@ MODEL_TYPES = ["SDXL", "FLUX"]
 COND_DIRECTION = ["<", ">", "<", ">", "<", ">", "<", ">", "<", ">", "<", ">", "<", ">", "<", ">", "<", ">", "<", ">", "<", ">", "<", ">", "<", ">", "<", ">", "<", ">", "<", ">", "<", ">"]
 COND_OPTS = ["WAS_blend", "concat", "average", "combine"]
 
-
-
+nodedir = os.path.dirname(os.path.abspath(__file__))
+logdir = os.path.join(nodedir, "logs")
+logfile = os.path.join(logdir, "kurthokke.log")
 logging.basicConfig(
-    level=logging.DEBUG,
+    filename=logdir + '/kurthokke.log',
+    filemode="a",
+    level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s",
 )
 logger = logging.getLogger(__name__)
+
 def log_function_call(func):
     def wrapper(*args, **kwargs):
         if len(args) > 0 and hasattr(args[0], '__class__'):

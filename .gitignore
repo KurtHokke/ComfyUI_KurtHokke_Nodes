@@ -1,4 +1,6 @@
 # Byte-compiled / optimized / DLL files
+logs/
+img/
 shed/
 nodes/temp
 __pycache__/

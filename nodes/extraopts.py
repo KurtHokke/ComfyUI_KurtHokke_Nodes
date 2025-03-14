@@ -1,6 +1,31 @@
-from ..utils import CATEGORY, COND_OPTS, COND_DIRECTION, any
+from ..utils import CATEGORY, COND_OPTS, COND_DIRECTION, any, logger
 from nodes import MAX_RESOLUTION
 from custom_nodes.was_extras.ConditioningBlend import blending_modes
+
+class ViewExtraOpts:
+    @classmethod
+    def INPUT_TYPES(s):
+        return {"required": {
+                    "extra_opts": ("EXTRA_OPTS", ),
+                }
+        }
+    RETURN_TYPES = ("STRING", )
+    RETURN_NAMES = ("string", )
+    FUNCTION = "view_extra_opts"
+    CATEGORY = CATEGORY.MAIN.value + CATEGORY.EXTRAOPTS.value
+
+    def view_extra_opts(self, extra_opts):
+        if not isinstance(extra_opts, dict):
+            return "Invalid input. Expected a dictionary."
+
+        # Build the string
+        string = ""
+        for key, value in extra_opts.items():
+            string += f"{key}: {value}\n"
+            logger.info(f"string: {string}")
+
+        return (string, )
+
 
 class MergeExtraOpts:
     @classmethod
@@ -72,6 +97,42 @@ class SEED_ExtraOpts:
         extra_opts = {"seed": seed}
         return (extra_opts, )
 
+class COND_SET_STRENGTH_ExtraOpts:
+    @classmethod
+    def INPUT_TYPES(s):
+        return {"required": {
+                    "enable_cond_1": ("BOOLEAN", {"default": True, "label_on": "On", "label_off": "Off"}),
+                    "enable_cond_2": ("BOOLEAN", {"default": True, "label_on": "On", "label_off": "Off"}),
+                    "strength_1": ("FLOAT", {"default": 1.000, "min": -100.000, "max": 100.000, "step": 0.001}),
+                    "strength_2": ("FLOAT", {"default": 1.000, "min": -100.000, "max": 100.000, "step": 0.001}),
+                },
+                "optional": {
+                    "prev_opts": ("EXTRA_OPTS", ),
+                }
+        }
+    RETURN_TYPES = ("EXTRA_OPTS", )
+    RETURN_NAMES = ("extra_opts", )
+    FUNCTION = "pack_extra_opts"
+    CATEGORY = CATEGORY.MAIN.value + CATEGORY.EXTRAOPTS.value
+
+    def pack_extra_opts(self, enable_cond_1, enable_cond_2, strength_1, strength_2, prev_opts=None):
+        extra_opts = {}
+        if prev_opts is None:
+            prev_opts = {}
+        if enable_cond_1 is True:
+            extra_opts1 = {"cond_set_strength_1": strength_1}
+            extra_opts = {**extra_opts1}
+        if enable_cond_2 is True:
+            extra_opts2 = {"cond_set_strength_2": strength_2}
+            extra_opts = {**extra_opts, **extra_opts2}
+        if extra_opts != {}:
+            cond_extra_opts = {"cond": True, "cond_set_strength": True}
+            extra_opts = {**cond_extra_opts, **extra_opts}
+
+        get_merged_opts = MergeExtraOpts()
+        extra_opts = get_merged_opts.merge_extra_opts(prev_opts, extra_opts)
+        return (extra_opts, )
+
 class COND_ExtraOpts:
     @classmethod
     def INPUT_TYPES(s):
@@ -92,17 +153,8 @@ class COND_ExtraOpts:
     CATEGORY = CATEGORY.MAIN.value + CATEGORY.EXTRAOPTS.value
 
     def pack_extra_opts(self, enabled, operation, WAS_blend_mode, direction, strength, prev_opts=None):
-        def replace_suffix(key, suffix="2"):
-            if key[-1].isdigit():
-                return f"{key[:-1]}{suffix}"
-            else:
-                return f"{key}{suffix}"
-        extra_opts1 = ""
-        extra_opts2 = ""
-        extra_opts3 = ""
-        extra_opts4 = ""
-        extra_opts5 = ""
         if enabled is True:
+            cond_extra_opts = {"cond": True}
             if operation == "WAS_blend":
                 extra_opts1 = {"WAS_blend": True}
                 extra_opts2 = {"WAS_blend_mode": WAS_blend_mode}
@@ -118,34 +170,28 @@ class COND_ExtraOpts:
                     prev_opts = {}
 
                 extra_opts = {**extra_opts1, **extra_opts2, **extra_opts3, **extra_opts4, **extra_opts5}
-                extra_opts_with_suffix = {f"{key}1": value for key, value in extra_opts.items()}
             elif operation == "combine":
                 extra_opts1 = {"combine": True}
                 extra_opts = {**extra_opts1}
-                extra_opts_with_suffix = {f"{key}1": value for key, value in extra_opts.items()}
 
             elif operation == "concat":
                 extra_opts1 = {"concat": True}
                 extra_opts2 = {"cond_direction": direction}
                 extra_opts = {**extra_opts1, **extra_opts2}
-                extra_opts_with_suffix = {f"{key}1": value for key, value in extra_opts.items()}
 
             elif operation == "average":
                 extra_opts1 = {"average": True}
                 extra_opts2 = {"cond_direction": direction}
                 extra_opts3 = {"strength": strength}
                 extra_opts = {**extra_opts1, **extra_opts2, **extra_opts3}
-                extra_opts_with_suffix = {f"{key}1": value for key, value in extra_opts.items()}
             else:
-                extra_opts_with_suffix = {}
+                extra_opts = {}
         else:
-            extra_opts = {"disabled": enabled}
-            extra_opts_with_suffix = {f"{key}1": value for key, value in extra_opts.items()}
+            cond_extra_opts = {}
+            extra_opts = {}
 
-        cond_extra_opts = {"cond": True}
-        extra_opts_with_suffix = {**cond_extra_opts, **extra_opts_with_suffix}
+        extra_opts = {**cond_extra_opts, **extra_opts}
 
-        extra_opts = extra_opts_with_suffix
 
         get_merged_opts = MergeExtraOpts()
         extra_opts = get_merged_opts.merge_extra_opts(prev_opts, extra_opts)
@@ -172,11 +218,11 @@ class COND_ExtraOpts_2:
 
     def pack_extra_opts(self, enabled, from_cfg, to_cfg, schedule, prev_opts=None):
         if enabled is True:
+            cond_extra_opts = {"cond": True}
             extra_opts1 = {"schedule_cfg": schedule}
             extra_opts2 = {"from_cfg": from_cfg}
             extra_opts3 = {"to_cfg": to_cfg}
-            extra_opts = {**extra_opts1, **extra_opts2, **extra_opts3}
-            extra_opts = {f"{key}1": value for key, value in extra_opts.items()}
+            extra_opts = {**cond_extra_opts, **extra_opts1, **extra_opts2, **extra_opts3}
         else:
             extra_opts = {}
 

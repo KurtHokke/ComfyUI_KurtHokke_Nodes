@@ -1,5 +1,5 @@
-import comfy
-from ..utils import CATEGORY
+from ..utils import CATEGORY, any, logger
+
 
 class Node_BOOL:
     @classmethod
@@ -99,3 +99,57 @@ class Node_RandomRange:
         random_float = random.uniform(min, max)
         random_int = int(random_float)
         return random_int, random_float
+
+class CompareTorch:
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "a": (any , ),
+                "b": (any , ),
+            }
+        }
+    RETURN_TYPES = (any, any, )
+    RETURN_NAMES = ("boolean", "*", )
+    FUNCTION = "compare"
+    CATEGORY = CATEGORY.MAIN.value + CATEGORY.UTILS.value
+
+    def unlist(self, nested):
+        if not isinstance(nested, (list, tuple)):
+            return [nested]  # Base case: If not iterable, wrap in a list.
+
+        flattened = []
+        for item in nested:
+            flattened.extend(self.unlist(item))  # Recursively flatten the structure.
+        return flattened
+
+    def compare(self, a, b):
+        import torch
+        import logging
+        logger = logging.getLogger()
+        for handler in logging.getLogger().handlers:
+            print(handler)
+            print(handler)
+            print(handler)
+            print(handler)
+            print(handler)
+
+        logger.info(f"{a}, {b}")
+        if isinstance(a, list):
+            logger.info(f"unlisting {a}")
+            a = self.unlist(a)
+        if isinstance(b, list):
+            logger.info(f"unlisting {b}")
+            b = self.unlist(b)
+        logger.info(f"type(a) == {type(a)}\ntype(b) == {type(b)}")
+        if not isinstance(a, torch.Tensor) or not isinstance(b, torch.Tensor):
+            exeptionstr = f"type(a) = {type(a)}, type(b) = {type(b)}\nCannot compare as both are not tensors"
+            return (exeptionstr, exeptionstr)
+        elif torch.equal(a, b):
+            return (True, f"a == b ==\\\n{a}")
+        else:
+            # Find element-wise differences if tensors are not equal
+            diff_indices = (a != b).nonzero(as_tuple=True)
+            differences = [f"At index {index}: a = {val1}, b = {val2}"
+                           for index, val1, val2 in zip(diff_indices[0], a[diff_indices], b[diff_indices])]
+            return "\n".join(differences) or "Tensors have the same shape and elements."
