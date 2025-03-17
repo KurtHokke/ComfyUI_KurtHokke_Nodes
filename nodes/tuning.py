@@ -1,4 +1,4 @@
-from ..utils import CATEGORY, MODEL_TYPES, any, log_function_call, logger
+from ..utils import CATEGORY, MODEL_TYPES, any, logger
 from comfy.comfy_types import *
 import node_helpers
 import comfy.samplers
@@ -20,7 +20,6 @@ def get_sigmas(model, scheduler, steps, denoise):
     return sigmas
 
 class AIO_Tuner_Pipe:
-    @log_function_call
     def __init__(self):
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -67,7 +66,6 @@ class AIO_Tuner_Pipe:
         positive2 = "None"
         positive3 = "None"
         positive4 = "None"
-
 
         if isinstance(denoise, float):
             denoise = str(denoise)

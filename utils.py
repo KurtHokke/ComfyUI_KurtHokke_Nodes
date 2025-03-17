@@ -5,36 +5,25 @@ import configparser
 import os
 import contextlib
 import torch
+import folder_paths
 
+NONE_EMBEDDINGS = ['None'] + folder_paths.get_filename_list("embeddings")
+NONE_LORAS = ['None'] + folder_paths.get_filename_list("loras")
 
 MODEL_TYPES = ["SDXL", "FLUX"]
+CLIP_DTYPES = ["fp16", "fp32", "fp8_e4m3fn", "fp8_e4m3fn_fast", "fp8_e5m2"]
 COND_DIRECTION = ["<", ">", "<", ">", "<", ">", "<", ">", "<", ">", "<", ">", "<", ">", "<", ">", "<", ">", "<", ">", "<", ">", "<", ">", "<", ">", "<", ">", "<", ">", "<", ">", "<", ">"]
 COND_OPTS = ["WAS_blend", "concat", "average", "combine"]
+OPERATIONS = ["unlist", "tensors*c"]
 
-nodedir = os.path.dirname(os.path.abspath(__file__))
-logdir = os.path.join(nodedir, "logs")
-logfile = os.path.join(logdir, "kurthokke.log")
+
 logging.basicConfig(
-    filename=logdir + '/kurthokke.log',
-    filemode="a",
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s",
 )
 logger = logging.getLogger(__name__)
 
-def log_function_call(func):
-    def wrapper(*args, **kwargs):
-        if len(args) > 0 and hasattr(args[0], '__class__'):
-            logger.info(
-                f"Calling classmethod {func.__name__} of {args[0].__class__.__name__} with args: {args} and kwargs: {kwargs}")
-        else:
-            logger.info(f"Calling {func.__name__} with args: {args} and kwargs: {kwargs}")
 
-        result = func(*args, **kwargs)
-        logger.info(f"{func.__name__} returned: {result}")
-        return result
-
-    return wrapper
 
 
 parent_dir = os.path.dirname(os.path.abspath(__file__))
@@ -69,6 +58,7 @@ class EmojiCategoriesEnabled:
         LORAS = "/🟣loras"
         CONDITIONING = "/🟠conditioning"
         EXTRAOPTS = "/⚙️extraopts"
+        HOOKS = "/🪝hooks"
 
         prefix = '>🛸 '
 
@@ -87,6 +77,7 @@ class EmojiCategoriesDisabled:
         LORAS = "/loras"
         CONDITIONING = "/conditioning"
         EXTRAOPTS = "/extraopts"
+        HOOKS = "/hooks"
 
         prefix = '> '
 

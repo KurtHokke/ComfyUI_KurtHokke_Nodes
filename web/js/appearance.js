@@ -5,6 +5,41 @@ app.registerExtension({
     name: "KurtHokke-Nodes.appearance",
         nodeCreated(node) {
             switch (node.comfyClass) {
+                case "AIO_Tuner_Pipe":
+                    node.shape = "box";
+                    node.color = "#386692";
+                    node.bgcolor = "#3053BC";
+                    break;
+                case "Node_BOOL":
+                    node.setSize([200, 58]);
+                    node.color = "#3f2b75";
+                    node.bgcolor = "#6233b8";
+                    break;
+                case "Node_BOOL":
+                    node.setSize([200, 58]);
+                    node.color = "#3f2b75";
+                    node.bgcolor = "#6233b8";
+                    break;
+                case "Node_BOOL":
+                    node.setSize([200, 58]);
+                    node.color = "#3f2b75";
+                    node.bgcolor = "#6233b8";
+                    break;
+                case "Node_BOOL":
+                    node.setSize([200, 58]);
+                    node.color = "#3f2b75";
+                    node.bgcolor = "#6233b8";
+                    break;
+                case "Node_BOOL":
+                    node.setSize([200, 58]);
+                    node.color = "#3f2b75";
+                    node.bgcolor = "#6233b8";
+                    break;
+                case "Node_BOOL":
+                    node.setSize([200, 58]);
+                    node.color = "#3f2b75";
+                    node.bgcolor = "#6233b8";
+                    break;
                 case "Node_BOOL":
                     node.setSize([200, 58]);
                     node.color = "#3f2b75";

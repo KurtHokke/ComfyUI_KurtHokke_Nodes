@@ -1,5 +1,5 @@
 from .. import utils
-from ..utils import CATEGORY, any
+from ..utils import CATEGORY, any, logger, CLIP_DTYPES
 
 from typing import TYPE_CHECKING, Union
 import logging
@@ -107,16 +107,36 @@ class CkptPipe:
     def INPUT_TYPES(s):
         return {"required": {
             "ckpt_name": (folder_paths.get_filename_list("checkpoints"), {"tooltip": "The name of the checkpoint (model) to load."}),
+            "CLIP_dtype" : (CLIP_DTYPES, ),
             "CLIPskip": ("INT", {"default": -1, "min": -24, "max": -1, "step": 1}),
         }}
 
-    RETURN_TYPES = ("UnetClipPipe", "VAE")
+    RETURN_TYPES = ("UnetClipPipe", "MODEL", "CLIP", "VAE")
     FUNCTION = "load_ckpt"
     CATEGORY = CATEGORY.MAIN.value + CATEGORY.LOADERS.value
 
-    def load_ckpt(self, ckpt_name, CLIPskip):
-        from nodes import CheckpointLoaderSimple
-        model, clip, vae = CheckpointLoaderSimple.load_checkpoint(self, ckpt_name)
+    def load_ckpt(self, ckpt_name, CLIP_dtype, CLIPskip):
+        from comfy.sd import load_checkpoint_guess_config
+
+        if CLIP_dtype == "fp16":
+            te_model_options = {"dtype": torch.float16}
+        elif CLIP_dtype == "fp32":
+            te_model_options = {"dtype": torch.float32}
+        elif CLIP_dtype == "fp8_e4m3fn":
+            te_model_options = {"dtype": torch.float8_e4m3fn}
+        elif CLIP_dtype == "fp8_e4m3fn_fast":
+            te_model_options = {"dtype": torch.float8_e4m3fn, "fp8_optimizations": True}
+        elif CLIP_dtype == "fp8_e5m2":
+            te_model_options = {"dtype": torch.float8_e5m2}
+        else:
+            te_model_options = {}
+
+        ckpt_path = folder_paths.get_full_path_or_raise("checkpoints", ckpt_name)
+        out = comfy.sd.load_checkpoint_guess_config(ckpt_path, output_vae=True, output_clip=True, embedding_directory=folder_paths.get_folder_paths("embeddings"), te_model_options=te_model_options)
+
+        model = out[0]
+        clip = out[1]
+        vae = out[2]
 
         clip = clip.clone()
         clip.clip_layer(CLIPskip)
@@ -126,7 +146,7 @@ class CkptPipe:
         UnetClipPipe.append(model)
         UnetClipPipe.append(clip)
 
-        return (UnetClipPipe, vae, )
+        return (UnetClipPipe, model, clip, vae, )
 
 
 class ModelPipe1:

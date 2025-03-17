@@ -1,6 +1,12 @@
-from ..utils import CATEGORY, COND_OPTS, COND_DIRECTION, any, logger
+from ..utils import CATEGORY, COND_OPTS, COND_DIRECTION, NONE_LORAS, any
+from ..loggers import get_logger
 from nodes import MAX_RESOLUTION
 from custom_nodes.was_extras.ConditioningBlend import blending_modes
+from comfy.comfy_types import *
+import folder_paths
+import comfy.hooks
+
+logger, log_all = get_logger("log_all")
 
 class ViewExtraOpts:
     @classmethod
@@ -26,7 +32,6 @@ class ViewExtraOpts:
 
         return (string, )
 
-
 class MergeExtraOpts:
     @classmethod
     def INPUT_TYPES(s):
@@ -50,6 +55,204 @@ class MergeExtraOpts:
 
         extra_opts = {**extra_opts1, **extra_opts2}
         return extra_opts
+
+class KeyframeExtraOpts:
+    @classmethod
+    def INPUT_TYPES(s):
+        return {
+            "required": {
+                "strength_start": ("FLOAT", {"default": 1.0, "min": 0.0, "max": 10.0, "step": 0.001}, ),
+                "strength_end": ("FLOAT", {"default": 1.0, "min": 0.0, "max": 10.0, "step": 0.001}, ),
+                "interpolation": (["linear", "ease_in", "ease_out", "ease_in_out"], ),
+                "start_percent": ("FLOAT", {"default": 0.0, "min": 0.0, "max": 1.0, "step": 0.001}),
+                "end_percent": ("FLOAT", {"default": 1.0, "min": 0.0, "max": 1.0, "step": 0.001}),
+                "keyframes_count": ("INT", {"default": 5, "min": 2, "max": 100, "step": 1}),
+                "print_keyframes": ("BOOLEAN", {"default": False}),
+            }
+        }
+    RETURN_TYPES = ("EXTRA_OPTS", )
+    RETURN_NAMES = ("extra_opts", )
+    FUNCTION = "pack_extra_opts"
+    CATEGORY = CATEGORY.MAIN.value + CATEGORY.EXTRAOPTS.value
+
+    def pack_extra_opts(self, strength_start, strength_end, interpolation, start_percent, end_percent, keyframes_count, print_keyframes):
+        extra_opts = []
+        extra_opts.append(strength_start)
+        extra_opts.append(strength_end)
+        extra_opts.append(interpolation)
+        extra_opts.append(start_percent)
+        extra_opts.append(end_percent)
+        extra_opts.append(keyframes_count)
+        extra_opts.append(print_keyframes)
+        return (extra_opts, )
+
+class LoraSettingsExtraOpts:
+    @classmethod
+    def INPUT_TYPES(s):
+        return {"required": {
+                "interpolation_1": (comfy.hooks.InterpolationMethod._LIST, ),
+                "interpolation_2": (comfy.hooks.InterpolationMethod._LIST, ),
+                "interpolation_3": (comfy.hooks.InterpolationMethod._LIST, ),
+                "interpolation_4": (comfy.hooks.InterpolationMethod._LIST, ),
+                }
+        }
+    RETURN_TYPES = ("LORA_SETTINGS", )
+    RETURN_NAMES = ("lora_settings", )
+    FUNCTION = "pack_lora_settings"
+    CATEGORY = CATEGORY.MAIN.value + CATEGORY.HOOKS.value
+
+    def pack_lora_settings(self, interpolation_1, interpolation_2, interpolation_3, interpolation_4):
+        lora_settings = {}
+        if interpolation_1 != "None":
+            lora_settings = {**lora_settings, "interpolation_1": interpolation_1}
+        if interpolation_2 != "None":
+            lora_settings = {**lora_settings, "interpolation_2": interpolation_2}
+        if interpolation_3 != "None":
+            lora_settings = {**lora_settings, "interpolation_3": interpolation_3}
+        if interpolation_4 != "None":
+            lora_settings = {**lora_settings, "interpolation_4": interpolation_4}
+        return (lora_settings, )
+
+class LoraNamesExtraOpts:
+    @classmethod
+    def INPUT_TYPES(s):
+        return {"required": {
+                    "lora_name_1": (NONE_LORAS, ),
+                    "lora_settings_1": ("STRING", {"default": "1.0,0.0,0.25", "tooltip": "float(strength)','float(start)','float(end)"}),
+                    "lora_name_2": (NONE_LORAS, ),
+                    "lora_settings_2": ("STRING", {"default": "1.0,0.25,0.5", "tooltip": "float(strength)','float(start)','float(end)"}),
+                    "lora_name_3": (NONE_LORAS, ),
+                    "lora_settings_3": ("STRING", {"default": "1.0,0.5,0.75", "tooltip": "float(strength)','float(start)','float(end)"}),
+                    "lora_name_4": (NONE_LORAS, ),
+                    "lora_settings_4": ("STRING", {"default": "1.0,0.75,1.0", "tooltip": "float(strength)','float(start)','float(end)"}),
+                },
+                "optional": {
+                    "lora_settings": ("LORA_SETTINGS", ),
+                }
+        }
+    RETURN_TYPES = ("LORA_NAMES", )
+    RETURN_NAMES = ("lora_names", )
+    FUNCTION = "pack_lora_names"
+    CATEGORY = CATEGORY.MAIN.value + CATEGORY.HOOKS.value
+
+    def pack_lora_names(self, lora_name_1, lora_settings_1, lora_name_2, lora_settings_2,
+                        lora_name_3, lora_settings_3, lora_name_4, lora_settings_4, lora_settings=None):
+        if lora_settings is None:
+            lora_settings = {}
+        loranames = {}
+        if lora_name_1 != "None":
+            loranames = {**loranames, "lora_name_1": lora_name_1, "lora_settings_1": lora_settings_1}
+            if "interpolation_1" in lora_settings:
+                lora_settings = {**lora_settings, "interpolation_1": lora_settings["interpolation_1"]}
+            else:
+                lora_settings = {**lora_settings, "interpolation_1": "linear"}
+        if lora_name_2 != "None":
+            loranames = {**loranames, "lora_name_2": lora_name_2, "lora_settings_2": lora_settings_2}
+            if "interpolation_2" in lora_settings:
+                lora_settings = {**lora_settings, "interpolation_2": lora_settings["interpolation_2"]}
+            else:
+                lora_settings = {**lora_settings, "interpolation_2": "linear"}
+        if lora_name_3 != "None":
+            loranames = {**loranames, "lora_name_3": lora_name_3, "lora_settings_3": lora_settings_3}
+            if "interpolation_3" in lora_settings:
+                lora_settings = {**lora_settings, "interpolation_3": lora_settings["interpolation_3"]}
+            else:
+                lora_settings = {**lora_settings, "interpolation_3": "linear"}
+        if lora_name_4 != "None":
+            loranames = {**loranames, "lora_name_4": lora_name_4, "lora_settings_4": lora_settings_4}
+            if "interpolation_4" in lora_settings:
+                lora_settings = {**lora_settings, "interpolation_4": lora_settings["interpolation_4"]}
+            else:
+                lora_settings = {**lora_settings, "interpolation_4": "linear"}
+        loranames = {**lora_settings, **loranames}
+        return (loranames, )
+
+
+class MultiplyTensorsExtraOpts:
+    @classmethod
+    def INPUT_TYPES(s):
+        return {"required": {
+                    "enable_cond_1": ("BOOLEAN", {"default": False, "label_on": "On", "label_off": "Off"}),
+                    "factor_1": ("FLOAT", {"default": 1.000, "min": -100.000, "max": 100.000, "step": 0.001}),
+                    "factor_pooled_1": ("FLOAT", {"default": 1.000, "min": -100.000, "max": 100.000, "step": 0.001}),
+                    "enable_cond_2": ("BOOLEAN", {"default": False, "label_on": "On", "label_off": "Off"}),
+                    "factor_2": ("FLOAT", {"default": 1.000, "min": -100.000, "max": 100.000, "step": 0.001}),
+                    "factor_pooled_2": ("FLOAT", {"default": 1.000, "min": -100.000, "max": 100.000, "step": 0.001}),
+                },
+                "optional": {
+                    "prev_opts": ("EXTRA_OPTS", ),
+                }
+        }
+    RETURN_TYPES = ("EXTRA_OPTS", )
+    RETURN_NAMES = ("extra_opts", )
+    FUNCTION = "pack_extra_opts"
+
+    CATEGORY = CATEGORY.MAIN.value + CATEGORY.EXTRAOPTS.value
+
+    def pack_extra_opts(self, enable_cond_1, factor_1, factor_pooled_1, enable_cond_2, factor_2, factor_pooled_2, prev_opts=None):
+        extra_opts = {}
+        if prev_opts is None:
+            prev_opts = {}
+        if enable_cond_1 is True:
+            extra_opts1 = {"cond_multiply_factor_1": factor_1}
+            extra_opts2 = {"cond_multiply_factor_pooled_1": factor_pooled_1}
+            extra_opts = {**extra_opts1, **extra_opts2}
+        if enable_cond_2 is True:
+            extra_opts1 = {"cond_multiply_factor_2": factor_2}
+            extra_opts2 = {"cond_multiply_factor_pooled_2": factor_pooled_2}
+            extra_opts = {**extra_opts, **extra_opts1, **extra_opts2}
+        if extra_opts != {}:
+            cond_extra_opts = {"cond": True, "cond_multiply": True}
+            extra_opts = {**prev_opts, **cond_extra_opts, **extra_opts}
+        return (extra_opts, )
+
+class TensorsExtraOpts:
+    @classmethod
+    def INPUT_TYPES(s):
+        return {"required": {
+            "which_cond": ("INT", {"default": 1, "min": 1, "max": 10}),
+            "norm_tensor": ("BOOLEAN", {"default": False, "label_on": "On", "label_off": "Off"}),
+            "standardize_tensor": ("BOOLEAN", {"default": False, "label_on": "On", "label_off": "Off"}),
+            "pool_mean": ("BOOLEAN", {"default": False, "label_on": "On", "label_off": "Off"}),
+            #"pool_std": ("BOOLEAN", {"default": False, "label_on": "On", "label_off": "Off"}),
+            #"pool_min": ("BOOLEAN", {"default": False, "label_on": "On", "label_off": "Off"}),
+            "pool_max": ("BOOLEAN", {"default": False, "label_on": "On", "label_off": "Off"}),
+            "pool_sequence": ("BOOLEAN", {"default": False, "label_on": "On", "label_off": "Off"}),
+            "clamp_tensor": ("BOOLEAN", {"default": False, "label_on": "On", "label_off": "Off"}),
+            "squeeze_tensor": ("BOOLEAN", {"default": False, "label_on": "On", "label_off": "Off"}),
+            },
+            "optional": {
+                "prev_opts": ("EXTRA_OPTS", ),
+            }
+        }
+    RETURN_TYPES = ("EXTRA_OPTS", )
+    RETURN_NAMES = ("extra_opts", )
+    FUNCTION = "pack_extra_opts"
+    CATEGORY = CATEGORY.MAIN.value + CATEGORY.EXTRAOPTS.value
+
+    def pack_extra_opts(self, which_cond, norm_tensor, standardize_tensor, pool_mean, pool_max, pool_sequence, clamp_tensor, squeeze_tensor, prev_opts=None):
+        extra_opts = {}
+        if prev_opts is None:
+            prev_opts = {}
+        if norm_tensor is True:
+            extra_opts = {**extra_opts, "norm_tensor": "norm_tensor"}
+        if standardize_tensor is True:
+            extra_opts = {**extra_opts, "standardize_tensor": "standardize_tensor"}
+        if pool_mean is True:
+            extra_opts = {**extra_opts, "pool_mean": "pool_mean"}
+        if pool_max is True:
+            extra_opts = {**extra_opts, "pool_max": "pool_max"}
+        if pool_sequence is True:
+            extra_opts = {**extra_opts, "pool_sequence": "pool_sequence"}
+        if clamp_tensor is True:
+            extra_opts = {**extra_opts, "clamp_tensor": "clamp_tensor"}
+        if squeeze_tensor is True:
+            extra_opts = {**extra_opts, "squeeze_tensor": "squeeze_tensor"}
+
+        if extra_opts != {}:
+
+            extra_opts = {**prev_opts, "cond_tensors": True, "which_cond_tensors": which_cond, **extra_opts, }
+        return (extra_opts, )
 
 class NoNegExtraOpts:
     @classmethod
