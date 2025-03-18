@@ -1,15 +1,37 @@
 from .loggers import get_logger
+import comfy.sd
+import torch
 
 logger, log_all = get_logger("log_all")
 
 class SampleAssembler:
-    def __init__(self):
+    def __init__(self, models):
         self.models = []
-        self.conditioing = []
-        self.guider = None
-        self.sampler = None
-        self.sigmas = None
+        self.prompts = {
+            "pos": [],
+            "neg": [],
+        }
+        self.latent_opts = []
+        self.latent_ch = 4
         self.extra_opts = None
+        self.device = "cuda:0" if torch.cuda.is_available() else "cpu"
+
+        self.update_models(models)
+
+    def update_models(self, models=None):
+        if self.models != models:
+            self.models = models
+            self.latent_ch = self.models[2].latent_channels
+
+    def update_prompts(self, pos_prompts=None, neg_prompts=None):
+        if self.prompts["pos"] != pos_prompts:
+            self.prompts["pos"] = pos_prompts
+        if self.prompts["neg"] != neg_prompts:
+            self.prompts["neg"] = neg_prompts
+
+    def get_latent(self, batch_size=1):
+        latent = torch.zeros([batch_size, self.latent_ch, self.latent_opts[1] // 8, self.latent_opts[0] // 8], device=self.device)
+        return ({"samples":latent}, )
 
 
 

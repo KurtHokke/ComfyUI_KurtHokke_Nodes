@@ -1,6 +1,6 @@
 import folder_paths
 import node_helpers
-from ..utils import CATEGORY, NONE_EMBEDDINGS
+from ..utils import CATEGORY, NONE_EMBEDDINGS, any
 from ..loggers import get_logger
 from ..core import DataHandler
 from comfy.comfy_types import IO, ComfyNodeABC, InputTypeDict
@@ -273,5 +273,36 @@ class ChainTextEncode(ComfyNodeABC):
             prev_cond = prev_cond.copy()
             prev_cond.append(cond)
         return (clip, prev_cond)
+
+class ChainText(ComfyNodeABC):
+    @classmethod
+    def INPUT_TYPES(s) -> InputTypeDict:
+        return {
+            "required": {
+                "text": (IO.STRING, {"multiline": True, "dynamicPrompts": True, "tooltip": "The text to be encoded."}),
+                "embedding": (NONE_EMBEDDINGS, {"defaultInput": False} ),
+            },
+            "optional": {
+                "cliptext_pipe": ("CLIPTEXT_PIPE", {"forceInput": True} ),
+                "clip": (IO.CLIP, {"tooltip": "The CLIP model used for encoding the text."}),
+            }
+        }
+    RETURN_TYPES = ("CLIPTEXT_PIPE",)
+    FUNCTION = "append"
+
+    CATEGORY = CATEGORY.MAIN.value + CATEGORY.CONDITIONING.value
+    DESCRIPTION = "Encodes a text prompt using a CLIP model into an embedding that can be used to guide the diffusion model towards generating specific images."
+
+    def append(self, text, embedding, cliptext_pipe=None, clip=None):
+        if cliptext_pipe is None and clip is None:
+            raise RuntimeError("ERROR: clip input is invalid: None\n\nIf the clip is from a checkpoint loader node your checkpoint does not contain a valid clip or text encoder model.")
+        if embedding != "None":
+            text = f"embedding:{embedding}, {text}"
+
+        if cliptext_pipe is not None:
+            cliptext_pipe.append(text)
+        else:
+            cliptext_pipe = [clip, text]
+        return (cliptext_pipe,)
 
 

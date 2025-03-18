@@ -3,7 +3,7 @@ from .utils import CATEGORY
 from .nodes.util_nodes import Node_BOOL, Node_INT, Node_Float, Node_String, Node_StringMultiline, Node_RandomRange
 from .nodes.util_nodes import CompareTorch, DoOperations, TensorStats, TensorToConditioning, DetailDaemonPrimitive
 from .nodes.debugany import DebugAny
-from .nodes.debugany2 import DebugAny2
+from .nodes.debugany2 import DebugAny2, DebugAny3
 from .nodes.pipe import BooleanToPipe, BooleanFromPipe
 from .nodes.math import ExpMath, ExpMathDual, ExpMathQuad
 from .nodes.misc import EmptyLatentSize, EmptyLatentSize64, SchedulerSel, SamplerSel
@@ -15,13 +15,14 @@ from .nodes.extraopts import ViewExtraOpts, MultiplyTensorsExtraOpts, TensorsExt
 from .nodes.extraopts import KeyframeExtraOpts
 from .nodes.custom_nodes__sd_dynamic_thresholding import DynamicThresholding, DynamicThresholdingBasic
 #from .nodes.cond import mycombine, splitcond
-from .nodes.cond import ChainTextEncode, ApplyCondsExtraOpts
+from .nodes.cond import ChainTextEncode, ApplyCondsExtraOpts, ChainText
 from .nodes.pysed import SedOnString
 from .nodes.pyre import re_sub_str
 from .nodes.str_manipulation import str_str, str_str_str_str
 from .nodes.modelinfo import get_lora_metadata
 from .nodes.loaders import NoModel_CkptLoader
 from .nodes.experimental_hooks import CreateHookLoraTestSelf, CreateHookWithKF, SetModelHooksOnCond, expHook
+from .nodes.AIO import AIO
 #from .nodes.debug import ExecutePythonNode
 #from .nodes.bashnode import BashScriptNode
 #from .nodes.inspectnode import InspectNode
@@ -44,6 +45,7 @@ NODE_CLASS_MAPPINGS = {
     "DetailDaemonPrimitive": DetailDaemonPrimitive,
     "DebugAny": DebugAny,
     "DebugAny2": DebugAny2,
+    "DebugAny3": DebugAny3,
     "BooleanToPipe": BooleanToPipe,
     "BooleanFromPipe": BooleanFromPipe,
     "ExpMath": ExpMath,
@@ -79,6 +81,7 @@ NODE_CLASS_MAPPINGS = {
     "DynamicThresholding": DynamicThresholding,
     "DynamicThresholdingBasic": DynamicThresholdingBasic,
     "ChainTextEncode": ChainTextEncode,
+    "ChainText": ChainText,
     "SedOnString": SedOnString,
     "re_sub_str": re_sub_str,
     "str_str": str_str,
@@ -95,6 +98,7 @@ NODE_CLASS_MAPPINGS = {
     "CreateHookWithKF": CreateHookWithKF,
     "SetModelHooksOnCond": SetModelHooksOnCond,
     "expHook": expHook,
+    "AIO": AIO,
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
@@ -111,6 +115,7 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "DetailDaemonPrimitive": prefix + "DetailDaemonPrimitive",
     "DebugAny": prefix + "DebugAny",
     "DebugAny2": prefix + "DebugAny2",
+    "DebugAny3": prefix + "DebugAny3",
     "BooleanToPipe": prefix + "BooleanToPipe",
     "BooleanFromPipe": prefix + "BooleanFromPipe",
     "ExpMath": prefix + "ExpMath",
@@ -146,6 +151,7 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "DynamicThresholding": prefix + "DynamicThresholding",
     "DynamicThresholdingBasic": prefix + "DynamicThresholdingBasic",
     "ChainTextEncode": prefix + "ChainTextEncode",
+    "ChainText": prefix + "ChainText",
     "SedOnString": prefix + "SedOnString",
     "re_sub_str": prefix + "re_sub_str",
     "str_str": prefix + "str_str",
@@ -162,6 +168,7 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "CreateHookWithKF": prefix + "CreateHookWithKF",
     "SetModelHooksOnCond": prefix + "SetModelHooksOnCond",
     "expHook": prefix + "expHook",
+    "AIO": prefix + "AIO",
 }
 
 __all__ = ["NODE_CLASS_MAPPINGS", "NODE_DISPLAY_NAME_MAPPINGS", "WEB_DIRECTORY"]

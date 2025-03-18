@@ -125,6 +125,7 @@ class AnyType(str):
       return False
 
 any = AnyType("*")
+anytype = AnyType("*")
 
 
 def parse_string_to_list(s):
