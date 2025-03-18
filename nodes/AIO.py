@@ -11,6 +11,7 @@ logger, log_all = get_logger("log_all")
 class AIO:
     def __init__(self):
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.processAIO = None
 
     @classmethod
     def INPUT_TYPES(s):
@@ -21,7 +22,7 @@ class AIO:
                 "sampler_name": (comfy.samplers.SAMPLER_NAMES, ),
                 "scheduler": (comfy.samplers.SCHEDULER_NAMES, ),
                 "steps": ("INT", {"default": 20, "min": 1, "max": 10000}),
-                "denoise": ("FLOAT", {"default": "1"}),
+                "denoise": ("FLOAT", {"default": 1.00, "min": 0.00, "max": 1.00, "step": 0.01}),
                 "width": ("INT", {"default": 1024, "min": 16, "max": MAX_RESOLUTION, "step": 16}),
                 "height": ("INT", {"default": 1024, "min": 16, "max": MAX_RESOLUTION, "step": 16}),
                 "noise_seed": ("INT", {"default": 0, "min": 0, "max": 0xffffffffffffffff}),
@@ -49,7 +50,8 @@ class AIO:
             return (sca_pipe, )
         clip = pos[0]
         models = [model, clip, vae]
-        processAIO = SampleAssembler(models)
+        if self.processAIO is None:
+            self.processAIO = SampleAssembler(models)
         pos_prompt = []
         neg_prompt = []
         for i in range(1, len(pos)):
@@ -57,10 +59,16 @@ class AIO:
         if neg is not None:
             for i in range(1, len(neg)):
                 neg_prompt.append(neg[i])
-        processAIO.set_prompts(pos_prompt, neg_prompt)
-        latent = processAIO.setget_latent(latent_opts=[width, height])[0]
-        conds = processAIO.get_conds(cfg_guidance)
-        return (f"{conds["t5xxl"]}\n{conds["clip_l"]}", )
+        self.processAIO.set_conds(cfg_guidance, pos_prompts=pos_prompt)
+        latent, noise = self.processAIO.get_latent_noise(latent_opts=[width, height], noise_seed=noise_seed)
+        #latent = latent
+        guider = self.processAIO.get_guider()
+        sigmas = self.processAIO.get_sigmas(scheduler=scheduler, steps=steps, denoise=denoise)
+        sampler = comfy.samplers.sampler_object(sampler_name)
+
+        sca_pipe = noise, guider, sampler, sigmas, latent, vae, extra_opts
+        return (sca_pipe, )
+        #return (f"{conds["t5xxl"]}\n{conds["clip_l"]}", )
 
 
 class extGSSS:

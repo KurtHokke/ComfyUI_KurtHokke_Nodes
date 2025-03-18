@@ -2,15 +2,16 @@ from ..utils import CATEGORY, anytype
 from ..helpers import ConfigManager
 from ..loggers import get_logger
 from comfy.comfy_types import IO, InputTypeDict
+import re
 
-logger, log_all = get_logger("log_all")
+logger, decoDebug = get_logger("all")
 
 debugany_config = ConfigManager("debugany.config")
 
 DEBUGANY_BASEOPTS = ["None", "Save script", "Call Attributes"]
 DEBUGANY_OPTS = debugany_config.generate_list(DEBUGANY_BASEOPTS, "debugany.config")
 
-@log_all
+@decoDebug
 class DebugAny3:
     @classmethod
     def INPUT_TYPES(cls):
@@ -119,7 +120,7 @@ class DebugAny3:
 
 
 
-@log_all
+@decoDebug
 class DebugAny2:
     @classmethod
     def INPUT_TYPES(cls):
@@ -151,14 +152,19 @@ class DebugAny2:
     def display_x(self, params="", a=None) -> str:
         if params == "" and a is None:
             return self.done(x="")
-        elif params == "" and a is not None:
-            if isinstance(a, str):
-                code = f"result = {str(a)}"
+        context = {"a": a}
+        if params == "" and a is not None:
+            if isinstance(a, str) or re.match(r"\s", a):
+                code = f"result = f'{str(a)}'"
             else:
                 code = f"result = {a}"
+            try:
+                exec(code, globals(), context)
+                return self.done(x=str(context["result"]))
+            except Exception as e:
+                return self.done(x=f"Exception occurred: {e}")
         else:
-            code = f"result = {params}"
-        context = {"a": a}
-        exec(code, globals(), context)
-        return self.done(x=str(context["result"]))
+            return self.done(x=f"Error: ")
+
+
 
