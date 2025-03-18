@@ -1,15 +1,9 @@
 from ..utils import CATEGORY, anytype
-from ..core import DataHandler
-from ..helpers import ConfigManager, restricted_import, original_import
+from ..helpers import ConfigManager
 from ..loggers import get_logger
 from comfy.comfy_types import IO, InputTypeDict
-import builtins
-import black
-import json
-import re
 
 logger, log_all = get_logger("log_all")
-
 
 debugany_config = ConfigManager("debugany.config")
 
@@ -59,8 +53,8 @@ class DebugAny3:
         #if params == "" and all(arg is None for arg in args):
             #return self.done(x="")
 
-        logger.info(f"###\n{kwargs}\n###")
-        logger.info(f"###\nkwargs: {kwargs}\n###")
+        logger.debug(f"###\n{kwargs}\n###")
+        logger.debug(f"###\nkwargs: {kwargs}\n###")
 
         #context = {key: value for key, value in kwargs.items() if value is not None}
         input_data = {}  # Dictionary to store data for inputs
@@ -91,7 +85,7 @@ class DebugAny3:
 
 
         # Step 3: Log the collected input data for debugging
-        logger.info(f"Collected input data: {input_data}")
+        logger.debug(f"Collected input data: {input_data}")
         self.done(x=str(input_data))
         return tuple(input_data.get(f"I{i}", None) for i in range(1, 9))
 

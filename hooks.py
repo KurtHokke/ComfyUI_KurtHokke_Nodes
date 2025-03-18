@@ -47,7 +47,7 @@ class HookHandler:
         if self.loaded_lora is not None:
             if self.loaded_lora[0] == lora_path:
                 lora = self.loaded_lora[1]
-                logger.info(f"{lora} loaded")
+                logger.debug(f"{lora} loaded")
             else:
                 temp = self.loaded_lora
                 self.loaded_lora = None
@@ -55,7 +55,7 @@ class HookHandler:
 
         if lora is None:
             lora = comfy.utils.load_torch_file(lora_path, safe_load=True)
-            logger.info(f"loaded {lora}")
+            logger.debug(f"loaded {lora}")
             self.loaded_lora = (lora_path, lora)
 
         hooks = comfy.hooks.create_hook_lora(lora=lora, strength_model=strength_model, strength_clip=strength_clip)
@@ -96,7 +96,7 @@ class HookHandler:
                 is_first = False
             prev_hook_kf.add(comfy.hooks.HookKeyframe(strength=strength, start_percent=percent, guarantee_steps=guarantee_steps))
             if print_keyframes:
-                logger.info(f"Hook Keyframe - start_percent:{percent} = {strength}")
+                logger.debug(f"Hook Keyframe - start_percent:{percent} = {strength}")
         return (prev_hook_kf,)
 
     def create_hook_kf_floats(self, floats_strength: Union[float, list[float]],
@@ -122,7 +122,7 @@ class HookHandler:
                 is_first = False
             prev_hook_kf.add(comfy.hooks.HookKeyframe(strength=strength, start_percent=percent, guarantee_steps=guarantee_steps))
             if print_keyframes:
-                logger.info(f"Hook Keyframe - start_percent:{percent} = {strength}")
+                logger.debug(f"Hook Keyframe - start_percent:{percent} = {strength}")
         return (prev_hook_kf,)
 
     def apply_clip_hooks(self, clip: CLIP, schedule_clip: bool, apply_to_conds: bool, hooks: comfy.hooks.HookGroup=None):

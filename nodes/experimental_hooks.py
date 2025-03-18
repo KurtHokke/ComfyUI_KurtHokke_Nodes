@@ -133,7 +133,7 @@ class expHook:
                     is_first = False
                 prev_hook_kf.add(comfy.hooks.HookKeyframe(strength=strength, start_percent=percent, guarantee_steps=guarantee_steps))
                 if print_keyframes:
-                    logger.info(f"Hook Keyframe - start_percent:{percent} = {strength}")
+                    logger.debug(f"Hook Keyframe - start_percent:{percent} = {strength}")
 
             if prev_hook_kf is not None:
                 hooks = prev_hooks.clone_and_combine(hooks)
@@ -185,8 +185,8 @@ class CreateHookWithKF:
             prev_hooks = HookInstance.create_hook(lora_name=lora_name, strength_model=strength_model, strength_clip=strength_clip, prev_hooks=prev_hooks)[0]
         else:
             prev_hooks = HookInstance.create_hook(lora_name=lora_name, strength_model=strength_model, strength_clip=strength_clip)[0]
-        logger.info(f"prev_hooks: {type(prev_hooks)}")
-        logger.info(f"prev_hook_kf: {type(prev_hook_kf)}")
+        logger.debug(f"prev_hooks: {type(prev_hooks)}")
+        logger.debug(f"prev_hook_kf: {type(prev_hook_kf)}")
         hooks = HookInstance.set_hook_keyframes(hooks=prev_hooks, hook_kf=prev_hook_kf)
         return (hooks,)
 

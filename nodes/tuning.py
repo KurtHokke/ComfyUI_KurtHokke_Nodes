@@ -73,7 +73,7 @@ class AIO_Tuner_Pipe:
         if ',' not in denoise:
             float_denoise = float(denoise)
             noise = Noise_RandomNoise(noise_seed)
-            logger.info(f"Using random noise: {noise}")
+            logger.debug(f"Using random noise: {noise}")
             SCA_PIPE.append(noise)
         else:
             SCA_PIPE.append(noise_seed)
@@ -86,15 +86,15 @@ class AIO_Tuner_Pipe:
             if "seed" not in extra_opts:
                 extra_opts5 = {"seed": noise_seed}
                 extra_opts = {**extra_opts, **extra_opts5}
-            logger.info(f"Applying condition extra opts: {extra_opts}")
+            logger.debug(f"Applying condition extra opts: {extra_opts}")
             positive = get_applycondsextraopts.apply_extra_opts(positive, extra_opts)[0]
-            logger.info(f"Applied extra opts: {positive}")
+            logger.debug(f"Applied extra opts: {positive}")
             #if debug:
                 #dbug = f"cond1: \n{positive}"
                 #positive1, positive2, positive3, positive4 = self.debugreturn(positive, positive2, positive3, positive4)
                 #return (SCA_PIPE, positive1, positive2, positive3, positive4, dbug)
         else:
-            logger.info(f"Not applying condition extra opts")
+            logger.debug(f"Not applying condition extra opts")
 
         if guider is None:
             get_basicguider = BasicGuider()
@@ -121,62 +121,62 @@ class AIO_Tuner_Pipe:
                     schedule_cfg1 = extra_opts["schedule_cfg"]
                     from_cfg1 = extra_opts["from_cfg"]
                     to_cfg1 = extra_opts["to_cfg"]
-                    logger.info(f"Using schedule_cfg:\n{schedule_cfg1}\n{from_cfg1}\n{to_cfg1}")
+                    logger.debug(f"Using schedule_cfg:\n{schedule_cfg1}\n{from_cfg1}\n{to_cfg1}")
                     sigmas1 = get_sigmas(model=model, scheduler=scheduler, steps=steps, denoise=float_denoise)
-                    logger.info(f"Using schedule_cfg sigmas:\n{sigmas1}")
+                    logger.debug(f"Using schedule_cfg sigmas:\n{sigmas1}")
                     if negative is None:
                         from nodes import ConditioningZeroOut
                         get_zero_out = ConditioningZeroOut()
                         neg_copy = positive.copy()
                         negative = get_zero_out.zero_out(neg_copy)[0]
-                        logger.info(f"Using node's zeroed out conditioning:\n{negative}")
+                        logger.debug(f"Using node's zeroed out conditioning:\n{negative}")
                     guider = ScheduledCFGGuider.get_guider(self, model=model, positive=positive, negative=negative, sigmas=sigmas1, from_cfg=from_cfg1, to_cfg=to_cfg1, schedule=schedule_cfg1)[0]
-                    logger.info(f"Using schedule_cfg guider, sigmas:\n{guider}")
+                    logger.debug(f"Using schedule_cfg guider, sigmas:\n{guider}")
 
                 elif negative is None and extra_opts is not None and "modify_pos_cfg" in extra_opts:
                     noneg_cfg = extra_opts["modify_pos_cfg"]
-                    logger.info(f"Using external noneg_cfg: {noneg_cfg}")
+                    logger.debug(f"Using external noneg_cfg: {noneg_cfg}")
                     from nodes import ConditioningZeroOut
                     get_zero_out = ConditioningZeroOut()
                     neg_copy = positive.copy()
                     negative = get_zero_out.zero_out(neg_copy)[0]
-                    logger.info(f"Using node's zeroed out conditioning:\n{negative}")
+                    logger.debug(f"Using node's zeroed out conditioning:\n{negative}")
                     guider = get_cfgguider.get_guider(model=model, positive=positive, negative=negative, cfg=noneg_cfg)[0]
-                    logger.info(f"noneg with cfg guider:\n{guider}")
+                    logger.debug(f"noneg with cfg guider:\n{guider}")
                 elif negative is None:
                     guider = get_basicguider.get_guider(model=model, conditioning=positive)[0]
-                    logger.info(f"Using node's guider: {guider}")
+                    logger.debug(f"Using node's guider: {guider}")
                 else:
                     guider = get_cfgguider.get_guider(model=model, positive=positive, negative=negative, cfg=guidance)[0]
-                    logger.info(f"Using node's guider: {guider}")
+                    logger.debug(f"Using node's guider: {guider}")
             else:
                 if negative is None:
                     guider = get_basicguider.get_guider(model=model, conditioning=positive)[0]
                 else:
                     guider = get_cfgguider.get_guider(model=model, positive=positive, negative=negative, cfg=guidance)[0]
-                logger.info(f"FALLBACK!!!:\n{guider}")
+                logger.debug(f"FALLBACK!!!:\n{guider}")
 
-            logger.info(f"Using node's guider: {guider}")
+            logger.debug(f"Using node's guider: {guider}")
         else:
-            logger.info(f"Using external guider: {guider}")
+            logger.debug(f"Using external guider: {guider}")
 
         SCA_PIPE.append(guider)
 
 
         if sampler is None:
             sampler = comfy.samplers.sampler_object(sampler_name)
-            logger.info(f"Using node's sampler: {sampler}")
+            logger.debug(f"Using node's sampler: {sampler}")
         else:
-            logger.info(f"Using external sampler: {sampler}")
+            logger.debug(f"Using external sampler: {sampler}")
         SCA_PIPE.append(sampler)
 
         if ',' not in denoise:
             if sigmas is None:
                 get_basicscheduler = BasicScheduler()
                 sigmas = get_basicscheduler.get_sigmas(model=model, scheduler=scheduler, steps=steps, denoise=float_denoise)[0]
-                logger.info(f"Using node's scheduler: {sigmas}")
+                logger.debug(f"Using node's scheduler: {sigmas}")
             else:
-                logger.info(f"Using external scheduler: {sigmas}")
+                logger.debug(f"Using external scheduler: {sigmas}")
 
             SCA_PIPE.append(sigmas)
         else:
@@ -190,31 +190,31 @@ class AIO_Tuner_Pipe:
                     if "width" in extra_opts and "height" in extra_opts:
                         width = extra_opts["width"]
                         height = extra_opts["height"]
-                        logger.info(f"Using extra opts batch size: {batch_size}")
-                        logger.info(f"Using extra opts width: {width}")
-                        logger.info(f"Using extra opts height: {height}")
+                        logger.debug(f"Using extra opts batch size: {batch_size}")
+                        logger.debug(f"Using extra opts width: {width}")
+                        logger.debug(f"Using extra opts height: {height}")
                     else:
-                        logger.info(f"Using extra opts batch size: {batch_size}")
+                        logger.debug(f"Using extra opts batch size: {batch_size}")
                 else:
                     batch_size = 1
-                    logger.info(f"Using default batch size: {batch_size}")
+                    logger.debug(f"Using default batch size: {batch_size}")
             else:
                 batch_size = 1
-                logger.info(f"Using default batch size: {batch_size}")
+                logger.debug(f"Using default batch size: {batch_size}")
 
             if model_type == "FLUX":
                 from comfy_extras.nodes_sd3 import EmptySD3LatentImage
                 get_emptysd3latentimage = EmptySD3LatentImage()
                 latent = get_emptysd3latentimage.generate(width, height, batch_size)[0]
-                logger.info(f"Using node's FLUX latent generator: {latent["samples"].shape}")
+                logger.debug(f"Using node's FLUX latent generator: {latent["samples"].shape}")
             else:
                 from nodes import EmptyLatentImage
                 get_emptylatentimage = EmptyLatentImage()
                 latent = get_emptylatentimage.generate(width, height, batch_size)[0]
-                logger.info(f"Using node's SDXL latent generator: {latent["samples"].shape}")
+                logger.debug(f"Using node's SDXL latent generator: {latent["samples"].shape}")
         else:
             latent = samples
-            logger.info(f"Using external latent: {latent["samples"].shape}")
+            logger.debug(f"Using external latent: {latent["samples"].shape}")
 
         if extra_opts is None:
             extra_opts = {}

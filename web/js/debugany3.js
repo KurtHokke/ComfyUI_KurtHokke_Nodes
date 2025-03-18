@@ -9,6 +9,9 @@ app.registerExtension({
         if (nodeData.name === 'DebugAny2') {
             setupDebugNode(nodeType, nodeData, app, nodeData.name);
         }
+        if (nodeData.name === 'CreateInstance') {
+            setupDebugNode(nodeType, nodeData, app, nodeData.name);
+        }
 
     }
 });

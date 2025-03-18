@@ -4,6 +4,7 @@ from .nodes.util_nodes import Node_BOOL, Node_INT, Node_Float, Node_String, Node
 from .nodes.util_nodes import CompareTorch, DoOperations, TensorStats, TensorToConditioning, DetailDaemonPrimitive
 from .nodes.debugany import DebugAny
 from .nodes.debugany2 import DebugAny2, DebugAny3
+from .nodes.create_instance import CreateInstance
 from .nodes.pipe import BooleanToPipe, BooleanFromPipe
 from .nodes.math import ExpMath, ExpMathDual, ExpMathQuad
 from .nodes.misc import EmptyLatentSize, EmptyLatentSize64, SchedulerSel, SamplerSel
@@ -22,7 +23,7 @@ from .nodes.str_manipulation import str_str, str_str_str_str
 from .nodes.modelinfo import get_lora_metadata
 from .nodes.loaders import NoModel_CkptLoader
 from .nodes.experimental_hooks import CreateHookLoraTestSelf, CreateHookWithKF, SetModelHooksOnCond, expHook
-from .nodes.AIO import AIO
+from .nodes.AIO import AIO, extGSSS
 #from .nodes.debug import ExecutePythonNode
 #from .nodes.bashnode import BashScriptNode
 #from .nodes.inspectnode import InspectNode
@@ -46,6 +47,7 @@ NODE_CLASS_MAPPINGS = {
     "DebugAny": DebugAny,
     "DebugAny2": DebugAny2,
     "DebugAny3": DebugAny3,
+    "CreateInstance": CreateInstance,
     "BooleanToPipe": BooleanToPipe,
     "BooleanFromPipe": BooleanFromPipe,
     "ExpMath": ExpMath,
@@ -99,6 +101,7 @@ NODE_CLASS_MAPPINGS = {
     "SetModelHooksOnCond": SetModelHooksOnCond,
     "expHook": expHook,
     "AIO": AIO,
+    "extGSSS": extGSSS,
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
@@ -116,6 +119,7 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "DebugAny": prefix + "DebugAny",
     "DebugAny2": prefix + "DebugAny2",
     "DebugAny3": prefix + "DebugAny3",
+    "CreateInstance": prefix + "CreateInstance",
     "BooleanToPipe": prefix + "BooleanToPipe",
     "BooleanFromPipe": prefix + "BooleanFromPipe",
     "ExpMath": prefix + "ExpMath",
@@ -169,6 +173,7 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "SetModelHooksOnCond": prefix + "SetModelHooksOnCond",
     "expHook": prefix + "expHook",
     "AIO": prefix + "AIO",
+    "extGSSS": prefix + "extGSSS",
 }
 
 __all__ = ["NODE_CLASS_MAPPINGS", "NODE_DISPLAY_NAME_MAPPINGS", "WEB_DIRECTORY"]

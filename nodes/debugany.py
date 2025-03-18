@@ -1,5 +1,5 @@
 from ..utils import CATEGORY, any
-from ..core import DataHandler
+from ..helpers import DataHandler
 from ..helpers import ConfigManager, restricted_import, original_import
 from ..loggers import get_logger
 import builtins
@@ -39,7 +39,7 @@ class DebugAny:
         params = params.strip()
         params = re.sub(r"\)$", "):", params)
         params = re.sub(r"^(\w+\()", r"def \1", params)
-        logger.info(f"params: {params}")
+        logger.debug(f"params: {params}")
         commas = re.findall(r"(\w|\d),\s", params)
         colons = re.findall(r"(\w|\d):\s", params)
         equals = re.findall(r"(\w|\d)=\w", params)
@@ -51,7 +51,7 @@ class DebugAny:
             params = re.sub(r"\s*=\s*", r"=", params)
         func_name = re.sub(r"^def\s(\w+)\(.*", r"\1", params)
         import textwrap
-        logger.info(f"params: {params}\nfunc_code: {func_code}")
+        logger.debug(f"params: {params}\nfunc_code: {func_code}")
         func_code = textwrap.indent(func_code, "    ")
         valid_code = black.format_str(f"{params}\n{func_code}", mode=black.Mode())
         return func_name, valid_code
@@ -65,7 +65,7 @@ class DebugAny:
             valid_code = func_code
 
         import inspect
-        logger.info(f"assembled {func_name}():\n{valid_code}")
+        logger.debug(f"assembled {func_name}():\n{valid_code}")
         if context is None:
             context = {}
         try:

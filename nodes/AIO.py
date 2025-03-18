@@ -28,13 +28,10 @@ class AIO:
             },
             "optional": {
                 "model": ("MODEL", ),
+                "vae": ("VAE", ),
                 "pos": ("CLIPTEXT_PIPE", ),
                 "neg": ("CLIPTEXT_PIPE", ),
-                "vae": ("VAE", ),
-                "guider": ("GUIDER", ),
-                "sampler": ("SAMPLER", ),
-                "sigmas": ("SIGMAS", ),
-                "samples": ("LATENT", ),
+                "g_s_s_s": ("GSSS", ),
                 "extra_opts": ("EXTRA_OPTS", ),
             }
         }
@@ -45,11 +42,10 @@ class AIO:
 
     def determine_sample_settings(self, cfg_guidance: float, sampler_name: list[str], scheduler: list[str],
                                   steps: int, denoise: float, width: int, height: int, noise_seed: int,
-                                  model=None, pos=None, neg=None, vae=None, guider=None, sampler=None,
-                                  sigmas=None, samples=None, extra_opts=None) -> tuple[list[any]]:
+                                  model=None, vae=None, pos=None, neg=None, g_s_s_s=None, extra_opts=None) -> tuple[list[any]]:
 
-        sca_pipe = [cfg_guidance, sampler_name, scheduler, steps, denoise, width, height, noise_seed, model, vae, guider, sampler, sigmas, samples, extra_opts]
-        if guider is not None:
+        sca_pipe = [cfg_guidance, sampler_name, scheduler, steps, denoise, width, height, noise_seed, model, vae, extra_opts]
+        if g_s_s_s is not None:
             return (sca_pipe, )
         clip = pos[0]
         models = [model, clip, vae]
@@ -61,18 +57,27 @@ class AIO:
         if neg is not None:
             for i in range(1, len(neg)):
                 neg_prompt.append(neg[i])
-        processAIO.update_prompts(pos_prompt, neg_prompt)
+        processAIO.set_prompts(pos_prompt, neg_prompt)
+        latent = processAIO.setget_latent(latent_opts=[width, height])["samples"]
+        conds = processAIO.get_conds(cfg_guidance)
+        return (conds, )
 
 
-        return (sca_pipe, )
-
-
-
-
-
-
-
-
-
-
-
+class extGSSS:
+    @classmethod
+    def INPUT_TYPES(s):
+        return {
+            "optional": {
+                "guider": ("GUIDER", ),
+                "sampler": ("SAMPLER", ),
+                "sigmas": ("SIGMAS", ),
+                "samples": ("LATENT", ),
+            }
+        }
+    RETURN_TYPES = ("GSSS", )
+    RETURN_NAMES = ("g_s_s_s", )
+    FUNCTION = "pack_gsss"
+    CATEGORY = CATEGORY.MAIN.value
+    def pack_gsss(self, guider=None, sampler=None, sigmas=None, samples=None):
+        gsss = [guider, sampler, sigmas, samples]
+        return (gsss, )

@@ -1,5 +1,5 @@
 from ..utils import CATEGORY, any, logger, OPERATIONS
-from ..core import DataHandler
+from ..helpers import DataHandler
 from comfy.comfy_types import *
 
 
@@ -128,14 +128,14 @@ class CompareTorch:
     def compare(self, a, b):
         import torch
 
-        logger.info(f"{a}, {b}")
+        logger.debug(f"{a}, {b}")
         if isinstance(a, list):
-            logger.info(f"unlisting {a}")
+            logger.debug(f"unlisting {a}")
             a = self.unlist(a)[0]
         if isinstance(b, list):
-            logger.info(f"unlisting {b}")
+            logger.debug(f"unlisting {b}")
             b = self.unlist(b)[0]
-        logger.info(f"type(a) == {type(a)}\ntype(b) == {type(b)}")
+        logger.debug(f"type(a) == {type(a)}\ntype(b) == {type(b)}")
         if not isinstance(a, torch.Tensor) or not isinstance(b, torch.Tensor):
             exeptionstr = f"type(a) = {type(a)}, type(b) = {type(b)}\nCannot compare as both are not tensors\n{a}\n{b}"
             return (exeptionstr, exeptionstr)
@@ -201,7 +201,7 @@ class TensorStats:
         if isinstance(tensor, list) or isinstance(tensor, tuple) or isinstance(tensor, torch.Tensor):
             if isinstance(tensor, (list, tuple)):
                 tensor = DataHandler.flatten(tensor)[0]
-                logger.info(f"flattened tensor:\n{tensor}")
+                logger.debug(f"flattened tensor:\n{tensor}")
                 if isinstance(tensor, torch.Tensor):
                     t_shape = tensor.shape
                     t_size = tensor.size()
@@ -248,14 +248,14 @@ class TensorToConditioning:
                 import torch
                 tensor = torch.Tensor(tensor)
                 tensor = tensor.tolist()
-                logger.info(f"tensor: {tensor}")
-                logger.info(f"tensor: {tensor}")
-                logger.info(f"tensor: {tensor}")
+                logger.debug(f"tensor: {tensor}")
+                logger.debug(f"tensor: {tensor}")
+                logger.debug(f"tensor: {tensor}")
                 return (tensor,)
             else:
-                logger.info(f"tensors nesting depth is not 2, nested depth:{list_depth}\nmake sure the tensor is surrounded by brackets like: [[...]]",)
+                logger.debug(f"tensors nesting depth is not 2, nested depth:{list_depth}\nmake sure the tensor is surrounded by brackets like: [[...]]",)
         else:
-            logger.info(f"INPUT IS NOT A LIST OR TUPLE: {type(tensor)}",)
+            logger.debug(f"INPUT IS NOT A LIST OR TUPLE: {type(tensor)}",)
 
 
 class DetailDaemonPrimitive:

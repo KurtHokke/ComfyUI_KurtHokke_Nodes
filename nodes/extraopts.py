@@ -28,7 +28,7 @@ class ViewExtraOpts:
         string = ""
         for key, value in extra_opts.items():
             string += f"{key}: {value}\n"
-            logger.info(f"string: {string}")
+            logger.debug(f"string: {string}")
 
         return (string, )
 

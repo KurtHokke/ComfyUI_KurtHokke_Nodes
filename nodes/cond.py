@@ -2,7 +2,7 @@ import folder_paths
 import node_helpers
 from ..utils import CATEGORY, NONE_EMBEDDINGS, any
 from ..loggers import get_logger
-from ..core import DataHandler
+from ..helpers import DataHandler
 from comfy.comfy_types import IO, ComfyNodeABC, InputTypeDict
 import random
 import torch
@@ -99,18 +99,18 @@ class ApplyCondsExtraOpts:
                 if len(conditioning) == 2:
                     conditioning1 = [conditioning[0]]
                     conditioning2 = conditioning[1]
-                    logger.info(f"{conditioning1}\n{conditioning2}")
+                    logger.debug(f"{conditioning1}\n{conditioning2}")
                     if "cond_multiply_factor_2" in extra_opts:
                         cond_multiply_factor_2 = extra_opts["cond_multiply_factor_2"]
                         cond_multiply_factor_pooled_2 = extra_opts["cond_multiply_factor_pooled_2"]
-                        logger.info(f"cond_multiply_factor_2: {cond_multiply_factor_2}\ncond_multiply_factor_pooled_2: {cond_multiply_factor_pooled_2}")
+                        logger.debug(f"cond_multiply_factor_2: {cond_multiply_factor_2}\ncond_multiply_factor_pooled_2: {cond_multiply_factor_pooled_2}")
                         conditioning2 = handle_data.multiply_tensors(conditioning2, left_f=cond_multiply_factor_2, right_f=cond_multiply_factor_pooled_2)
                 else:
                     conditioning1 = [conditioning[0]]
-                    logger.info(f"{conditioning1}")
+                    logger.debug(f"{conditioning1}")
                 cond_multiply_factor_1 = extra_opts["cond_multiply_factor_1"]
                 cond_multiply_factor_pooled_1 = extra_opts["cond_multiply_factor_pooled_1"]
-                logger.info(f"cond_multiply_factor_1: {cond_multiply_factor_1}\ncond_multiply_factor_pooled_1: {cond_multiply_factor_pooled_1}")
+                logger.debug(f"cond_multiply_factor_1: {cond_multiply_factor_1}\ncond_multiply_factor_pooled_1: {cond_multiply_factor_pooled_1}")
                 conditioning1 = handle_data.multiply_tensors(conditioning1, left_f=cond_multiply_factor_1, right_f=cond_multiply_factor_pooled_1)[0]
 
                 if len(conditioning) == 2:
@@ -165,19 +165,19 @@ class ApplyCondsExtraOpts:
             if "cond_set_strength_1" in extra_opts:
                 cond_set_strength_1 = extra_opts["cond_set_strength_1"]
                 temp_cond1 = get_cond_set_strength.append([conditioning[0]], cond_set_strength_1)[0]
-                logger.info(f"temp_1: {temp_cond1}")
-                logger.info(f"cond_1 set to: {cond_set_strength_1}")
+                logger.debug(f"temp_1: {temp_cond1}")
+                logger.debug(f"cond_1 set to: {cond_set_strength_1}")
             else:
                 temp_cond1 = [conditioning[0]]
             if "cond_set_strength_2" in extra_opts and len(conditioning) >= 2:
                 cond_set_strength_2 = extra_opts["cond_set_strength_2"]
                 temp_cond2 = get_cond_set_strength.append(conditioning[1], cond_set_strength_2)[0]
-                logger.info(f"temp_2: {temp_cond2}")
-                logger.info(f"cond_2 set to: {cond_set_strength_2}")
+                logger.debug(f"temp_2: {temp_cond2}")
+                logger.debug(f"cond_2 set to: {cond_set_strength_2}")
             else:
                 temp_cond2 = conditioning[1]
             conditioning = [temp_cond1, temp_cond2]
-            logger.info(f"temp1temp2: {conditioning}")
+            logger.debug(f"temp1temp2: {conditioning}")
         if len(conditioning) != 2:
             return [conditioning]
         else:
@@ -185,15 +185,15 @@ class ApplyCondsExtraOpts:
                 if "cond_direction" in extra_opts and extra_opts["cond_direction"] == '<':
                     conditioning1 = [conditioning[0]]
                     conditioning2 = conditioning[1]
-                    logger.info(f"<: {conditioning1}\n{conditioning2}")
+                    logger.debug(f"<: {conditioning1}\n{conditioning2}")
                 elif "cond_direction" in extra_opts and extra_opts["cond_direction"] == '>':
                     conditioning1 = conditioning[1]
                     conditioning2 = [conditioning[0]]
-                    logger.info(f">: {conditioning1}\n{conditioning2}")
+                    logger.debug(f">: {conditioning1}\n{conditioning2}")
                 else:
                     conditioning1 = [conditioning[0]]
                     conditioning2 = conditioning[1]
-                    logger.info(f"<>: {conditioning1}\n{conditioning2}")
+                    logger.debug(f"<>: {conditioning1}\n{conditioning2}")
 
                 if "WAS_blend" in extra_opts:
                     from custom_nodes.was_extras.ConditioningBlend import WAS_ConditioningBlend
@@ -201,17 +201,17 @@ class ApplyCondsExtraOpts:
                     if "WAS_blend_mode" in extra_opts and "strength" in extra_opts:
                         blend_mode = extra_opts["WAS_blend_mode"]
                         strength = extra_opts["strength"]
-                        logger.info(f"blend_mode: {blend_mode}\nblend_strength: {strength}")
+                        logger.debug(f"blend_mode: {blend_mode}\nblend_strength: {strength}")
                     else:
-                        logger.info(f"WAS_blend_mode not found in\n{extra_opts}")
+                        logger.debug(f"WAS_blend_mode not found in\n{extra_opts}")
                         return conditioning
 
                     if "seed" in extra_opts:
                         seed = extra_opts["seed"]
-                        logger.info(f"seed: {seed}")
+                        logger.debug(f"seed: {seed}")
                     else:
                         seed = random.randint(0, 0xffffffffffffffff)
-                        logger.info(f"seed not in extra opts, generating random seed:\n{seed}")
+                        logger.debug(f"seed not in extra opts, generating random seed:\n{seed}")
                     conditioning_WAS_blend = get_blend.combine(conditioning1, conditioning2, blend_mode, strength, seed=int(seed))[0]
                     conditioning = [conditioning_WAS_blend,]
 
