@@ -58,9 +58,9 @@ class AIO:
             for i in range(1, len(neg)):
                 neg_prompt.append(neg[i])
         processAIO.set_prompts(pos_prompt, neg_prompt)
-        latent = processAIO.setget_latent(latent_opts=[width, height])["samples"]
+        latent = processAIO.setget_latent(latent_opts=[width, height])[0]
         conds = processAIO.get_conds(cfg_guidance)
-        return (conds, )
+        return (f"{conds["t5xxl"]}\n{conds["clip_l"]}", )
 
 
 class extGSSS:
