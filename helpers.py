@@ -9,7 +9,15 @@ import sys
 
 logger, decoDebug = get_logger("all")
 log_function = get_logger("function")
-#
+
+def precheck(method):
+    def wrapper(self, *args, **kwargs):
+        self.check_state()  # Call your checking function here
+        return method(self, *args, **kwargs)  # Proceed to the original method
+
+    return wrapper
+
+
 class ConfigManager:
     def __init__(self, config_name: str) -> None:
         self.config_dir = Path(os.path.join(folder_paths.get_user_directory(), "default", "kurthokke_nodes"))

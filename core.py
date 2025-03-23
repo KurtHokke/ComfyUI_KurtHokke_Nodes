@@ -1,9 +1,11 @@
 from .loggers import get_logger
+from .helpers import precheck
 import node_helpers
 import comfy.sd
 from comfy.samplers import CFGGuider
 from comfy_extras.nodes_custom_sampler import Noise_RandomNoise
 from comfy.comfy_types import IO, InputTypeDict
+import warnings
 
 
 import torch
@@ -13,7 +15,11 @@ logger, decoDebug = get_logger("all")
 @decoDebug
 class SampleAssembler:
     def __init__(self, models):
-        self.models = []
+        self.models = {
+            "unet": None,
+            "clip": None,
+            "vae": None,
+        }
         self.def_conds = {
             "t5xxl": "",
             "clip_l": "",
@@ -29,19 +35,33 @@ class SampleAssembler:
         self.guider = None
         self.latent_opts = []
         self.latent_ch = None
-        self.device = "cuda:0" if torch.cuda.is_available() else "cpu"
+        try:
+            self.device = "cuda:0" if torch.cuda.is_available() else "cpu"
+        except Exception as e:
+            warnings.warn(f"Failed to set device; defaulting to 'cpu': {e}")
+            self.device = "cpu"
 
         self.set_models(models)
-        #self.extra_opts = None
+
+    def check_state(self):
+        # Define your pre-check logic here
+        if not self.models or len(self.models) < 1:
+            raise ValueError("Models are not properly set or initialized!")
+        if self.device != "cpu" and self.device != "cuda:0":
+            raise ValueError(f"Invalid device set: {self.device}")
 
     def reset_conds(self):
         self.conds = self.def_conds.copy()
 
     def set_models(self, models=None):
-        if self.models != models:
+        if "unet" in models and "clip" in models and "vae" in models:
             self.models = models
-            self.latent_ch = self.models[2].latent_channels
+            if models and len(models) > 2 and hasattr(models[2], "latent_channels"):
+                self.latent_ch = models[2].latent_channels
+            else:
+                raise ValueError("Invalid model input. Expected a model with attribute 'latent_channels' at index 2.")
 
+    @precheck
     def get_latent_noise(self, latent_opts, noise_seed, batch_size=1, device=None):
         if device is not None:
             self.device = device

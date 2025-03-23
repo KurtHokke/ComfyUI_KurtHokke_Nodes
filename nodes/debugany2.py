@@ -91,33 +91,6 @@ class DebugAny3:
         return tuple(input_data.get(f"I{i}", None) for i in range(1, 9))
 
 
-        #context = {key: value for key, value in kwargs.items() if value is not None}
-        results = [None] * 8
-
-        if params == "" and any(value is not None for value in kwargs.values()):
-            # Iterate over the expected input keys (`I1`, `I2`, ..., `I8`)
-            context = {}
-            for i in range(9, 16):
-                input_key = f"I{i + 1}"  # I1, I2, ..., I8
-                if input_key in kwargs and kwargs[input_key] is not None:
-                    # Simply store the object reference in the context directly
-                    context[f"result_{input_key}"] = kwargs[input_key]
-                    # Add to the appropriate output slot
-                    results[i] = context[f"result_{input_key}"]
-
-            # Return the results as a tuple
-            return tuple(results)
-
-        # Handle the case where `params` is not empty
-        try:
-            context = {key: value for key, value in kwargs.items() if value is not None}
-            code = f"result = {params}"
-            exec(code, globals(), context)
-            return self.done(x=str(context["result"]))
-        except Exception as e:
-            # Handle errors gracefully
-            return self.done(x=f"Exception occurred: {e}")
-
 
 
 @decoDebug
