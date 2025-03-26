@@ -3,7 +3,7 @@ logs/
 img/
 shed/
 nodes/temp
-__init__.py.old
+*.old
 __pycache__/
 *.py[cod]
 *$py.class
