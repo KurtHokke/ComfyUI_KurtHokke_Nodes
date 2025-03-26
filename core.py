@@ -19,6 +19,7 @@ class SampleAssembler:
     def _start(self, init=False):
         if init:
             self._vaeattr()
+        self._get_dicts = self._update__get_dicts()
         self._get_guider()
         self._get_sampler()
         self._get_sigmas()
@@ -66,80 +67,115 @@ class SampleAssembler:
             is_changed = False
             prev_sca_dict = self.sca_dict.copy()
             self.sca_dict = sca_dict.copy()
+            _get_dicts = self._update__get_dicts()
             if sca_dict["vae"] != prev_sca_dict["vae"]:
                 prev_latent_ch = self.latent_ch
                 latent_ch = sca_dict["vae"].latent_channels
                 if prev_latent_ch != latent_ch:
-                    self._start(init=True)
+                    self._update("ALL", changed=True)
                     return {**self.sca_pipe, "noise": noise}
-            if sca_dict["model"] != prev_sca_dict["model"] or sca_dict["clip"] != prev_sca_dict["clip"] or sca_dict["pos"] != prev_sca_dict["pos"] or sca_dict["neg"] != prev_sca_dict["neg"]:
-                self._get_guider()
+            if _get_dicts["guider_dict"] != self._get_dicts["guider_dict"]:
+                current_guider_dict_nocfg = {k: v for k, v in _get_dicts["guider_dict"].items() if k != "cfg_guid"}
+                prev_guider_dict_nocfg = {k: v for k, v in self._get_dicts["guider_dict"].items() if k != "cfg_guid"}
+                logger.debug(f"current_guider_dict_nocfg: {current_guider_dict_nocfg}")
+                logger.debug(f"_get_dicts['guider_dict']: {_get_dicts['guider_dict']}")
+                logger.debug(f"prev_guider_dict_nocfg: {prev_guider_dict_nocfg}")
+                logger.debug(f"self._get_dicts['guider_dict']: {self._get_dicts['guider_dict']}")
+                if current_guider_dict_nocfg == prev_guider_dict_nocfg:
+                    self._update("guider", changed=self.sca_dict["cfg_guid"])
+                else:
+                    self._update("guider")
                 is_changed = True
-            if sca_dict["scheduler"] != prev_sca_dict["scheduler"] or sca_dict["denoise"] != prev_sca_dict["denoise"] or sca_dict["steps"] != prev_sca_dict["steps"]:
-                self._get_sigmas()
+
+            if _get_dicts["sigmas_dict"] != self._get_dicts["sigmas_dict"]:
+                self._update("sigmas")
                 is_changed = True
-            if sca_dict["width"] != prev_sca_dict["width"] or sca_dict["height"] != prev_sca_dict["height"]:
-                self._get_latent()
+
+            if _get_dicts["sampler_dict"] != self._get_dicts["sampler_dict"]:
+                self._update("sampler")
                 is_changed = True
-            if sca_dict["sampler_name"] != prev_sca_dict["sampler_name"]:
-                self._get_sampler()
+
+            if _get_dicts["latent_dict"] != self._get_dicts["latent_dict"]:
+                self._update("latent")
                 is_changed = True
+
             if not is_changed:
-                self._start()
-                return {**self.sca_pipe, "noise": noise}
-            self._assemble_pipe()
+                self._update("ALL", changed=False)
+
             return {**self.sca_pipe, "noise": noise}
 
-    def _get_guider(self):
-        model = self.sca_dict["model"]
-        clip = self.sca_dict["clip"]
-        pos = self.sca_dict["pos"]
-        neg = self.sca_dict["neg"]
-        cfg_guid = self.sca_dict["cfg_guid"]
-        if self.latent_ch == 16:
-            pos_cond = self.fluxclip.encode(clip=clip, clip_l=pos[1], t5xxl=pos[0], guidance=cfg_guid)[0]
-            pos_cond = self.fluxguidance.append(conditioning=pos_cond, guidance=cfg_guid)[0]
-            if neg is None:
-                self._instance("basicguider")
-                self.guider = self.basicguider.get_guider(model=model, conditioning=pos_cond)[0]
-            else:
-                self._instance("cfgguider")
-                neg_cond = self.sdclip.encode(clip=clip, text=neg[0])[0]
+    def _update(self, *args, changed="ALL"):
+        for x in args:
+            if x == "guider":
+                self._get_guider(changed)
+            elif x == "sigmas":
+                self._get_sigmas(changed)
+            elif x == "sampler":
+                self._get_sampler(changed)
+            elif x == "latent":
+                self._get_latent(changed)
+            elif x == "ALL":
+                logger.info(f"UPDATING ALL!!!!")
+                self._start(init=changed)
+                return
+        self._assemble_pipe()
 
-
+    def _guider(self, model, cfg_guid, neg=False):
+        if neg:
+            self._instance("cfgguider")
+            self.guider = self.cfgguider.get_guider(model=model, positive=self.pos_cond, negative=self.neg_cond, cfg=cfg_guid)[0]
         else:
-            pos_cond = self.sdclip.encode(clip=clip, text=pos[0])[0]
-            if neg is None:
-                if "skip_emptyneg" in self.sca_dict["extra_opts"]:
-                    neg_copy = pos_cond.copy()
-                neg_cond = self.cond_zero_out.zero_out(conditioning=neg_copy)[0]
-                self.guider = self.cfgguider.get_guider(model=model, positive=pos_cond, negative=neg_cond, cfg=cfg_guid)[0]
+            self._instance("basicguider")
+            self.guider = self.basicguider.get_guider(model=model, conditioning=self.pos_cond)[0]
 
-            elif neg is not None:
-                neg_cond = self.sdclip.encode(clip=clip, text=neg[0])[0]
-                self.guider = self.cfgguider.get_guider(model=model, positive=pos_cond, negative=neg_cond, cfg=cfg_guid)[0]
-
-            else:
-                logger.info("Error: get_guider()")
-
-    def _get_sigmas(self):
-        model = self.sca_dict["model"]
-        scheduler = self.sca_dict["scheduler"]
-        denoise = self.sca_dict["denoise"]
-        steps = self.sca_dict["steps"]
-        self.sigmas = self.basic_scheduler.get_sigmas(model=model, scheduler=scheduler, steps=steps, denoise=denoise)[0]
-
-    def _get_sampler(self):
-        sampler_name = self.sca_dict["sampler_name"]
-        self.sampler = sampler_object(sampler_name)
-
-    def _get_latent(self):
-        width = self.sca_dict["width"]
-        height = self.sca_dict["height"]
+    def _get_guider(self, changed="ALL"):
+        model, clip, pos, neg, cfg_guid = self._getitem(self._get_dicts["guider_dict"])
         if self.latent_ch == 16:
-            self.latent_image = self.fluxlatent.generate(width, height, 1)[0]
+            self.pos_cond = self.fluxclip.encode(clip=clip, clip_l=pos[1], t5xxl=pos[0], guidance=cfg_guid)[0]
+            self.pos_cond = self.fluxguidance.append(conditioning=self.pos_cond, guidance=cfg_guid)[0]
+            if neg is None:
+                self._guider(model, cfg_guid)
+            else:
+                self._guider(model, cfg_guid, neg=True)
         else:
-            self.latent_image = self.sdlatent.generate(width, height, 1)[0]
+            if changed == cfg_guid and hasattr(self, "pos_cond"):
+                if neg is None:
+                    if "skip_emptyneg" in self.sca_dict["extra_opts"]:
+                        self._guider(model, cfg_guid)
+                elif hasattr(self, "neg_cond"):
+                    self._guider(model, cfg_guid, neg=True)
+            else:
+                self.pos_cond = self.sdclip.encode(clip=clip, text=pos[0])[0]
+                if neg is None:
+                    if "skip_emptyneg" in self.sca_dict["extra_opts"]:
+                        self._guider(model, cfg_guid)
+                    else:
+                        neg_copy = self.pos_cond.copy()
+                        self.neg_cond = self.cond_zero_out.zero_out(conditioning=neg_copy)[0]
+                        self._guider(model, cfg_guid, neg=True)
+                elif neg is not None:
+                    self.neg_cond = self.sdclip.encode(clip=clip, text=neg[0])[0]
+                    self._guider(model, cfg_guid, neg=True)
+                else:
+                    logger.info("Error: get_guider()")
+
+    def _get_sigmas(self, changed="ALL"):
+        model, scheduler, denoise, steps = self._getitem(self._get_dicts["sigmas_dict"])
+        if changed == "ALL":
+            self.sigmas = self.basic_scheduler.get_sigmas(model=model, scheduler=scheduler, steps=steps, denoise=denoise)[0]
+
+    def _get_sampler(self, changed="ALL"):
+        sampler_name = self._getitem(self._get_dicts["sampler_dict"])
+        if changed == "ALL":
+            self.sampler = sampler_object(sampler_name)
+
+    def _get_latent(self, changed="ALL"):
+        width, height = self._getitem(self._get_dicts["latent_dict"])
+        if changed == "ALL":
+            if self.latent_ch == 16:
+                self.latent_image = self.fluxlatent.generate(width, height, 1)[0]
+            else:
+                self.latent_image = self.sdlatent.generate(width, height, 1)[0]
 
     def _assemble_pipe(self):
         self.sca_pipe = {
@@ -149,3 +185,33 @@ class SampleAssembler:
             "samples": self.latent_image,
             "vae": self.vae,
         }
+
+    def _update__get_dicts(self):
+        _get_dicts = {
+            "guider_dict": {
+                "model": self.sca_dict["model"],
+                "clip": self.sca_dict["clip"],
+                "pos": self.sca_dict["pos"],
+                "neg": self.sca_dict["neg"],
+                "cfg_guid": self.sca_dict["cfg_guid"]
+            },
+            "sigmas_dict": {
+                "model": self.sca_dict["model"],
+                "scheduler": self.sca_dict["scheduler"],
+                "denoise": self.sca_dict["denoise"],
+                "steps": self.sca_dict["steps"]
+            },
+            "sampler_dict": {
+                "sampler_name": self.sca_dict["sampler_name"]
+            },
+            "latent_dict": {
+                "width": self.sca_dict["width"],
+                "height": self.sca_dict["height"]
+            }
+        }
+        return _get_dicts
+
+    def _getitem(self, input_dict):
+        if isinstance(input_dict, dict):
+            return list(input_dict.keys())
+        raise TypeError("Input must be a dictionary")
