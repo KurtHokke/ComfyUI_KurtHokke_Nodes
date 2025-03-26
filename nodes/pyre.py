@@ -1,4 +1,4 @@
-from ..utils import CATEGORY, prefix
+from khn.utils import CATEGORY, prefix
 import re
 
 class re_sub_str:

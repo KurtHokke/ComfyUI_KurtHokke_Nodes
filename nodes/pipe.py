@@ -4,7 +4,7 @@ https://github.com/crystian/ComfyUI-Crystools
 https://github.com/cubiq/ComfyUI_essentials
   Many thanks goes to these awesome developers!
 '''
-from ..utils import CATEGORY, any, BOOLEAN, INT, FLOAT, STRING, prefix
+from khn.utils import CATEGORY, any, BOOLEAN, INT, FLOAT, STRING, prefix
 import math
 import torch
 import time
@@ -68,3 +68,11 @@ class BooleanFromPipe:
         return boolean_1, boolean_2, boolean_3, boolean_4
 
 
+NODE_CLASS_MAPPINGS = {
+    "BooleanToPipe": BooleanToPipe,
+    "BooleanFromPipe": BooleanFromPipe,
+}
+NODE_DISPLAY_NAME_MAPPINGS = {
+    "BooleanToPipe": prefix + "BooleanToPipe",
+    "BooleanFromPipe": prefix + "BooleanFromPipe",
+}

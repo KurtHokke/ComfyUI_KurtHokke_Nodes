@@ -1,4 +1,4 @@
-from .loggers import get_logger
+from khn.loggers import get_logger
 from comfy.samplers import CFGGuider, sampler_object
 from comfy.comfy_types import IO, InputTypeDict
 from comfy_extras.nodes_flux import CLIPTextEncodeFlux, FluxGuidance
@@ -111,7 +111,7 @@ class SampleAssembler:
             pos_cond = self.sdclip.encode(clip=clip, text=pos[0])[0]
             if neg is None:
                 if "skip_emptyneg" in self.sca_dict["extra_opts"]:
-                neg_copy = pos_cond.copy()
+                    neg_copy = pos_cond.copy()
                 neg_cond = self.cond_zero_out.zero_out(conditioning=neg_copy)[0]
                 self.guider = self.cfgguider.get_guider(model=model, positive=pos_cond, negative=neg_cond, cfg=cfg_guid)[0]
 

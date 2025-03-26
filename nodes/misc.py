@@ -1,4 +1,4 @@
-from ..utils import CATEGORY, parse_string_to_list, prefix
+from khn.utils import CATEGORY, parse_string_to_list, prefix
 import comfy.model_management
 from nodes import MAX_RESOLUTION
 import torch
@@ -145,3 +145,20 @@ class LoraFluxParams:
             output["strengths"].append(parse_string_to_list(strength_lora_7))
 
         return (output,)
+
+
+NODE_CLASS_MAPPINGS = {
+    "EmptyLatentSize": EmptyLatentSize,
+    "EmptyLatentSize64": EmptyLatentSize64,
+    "SamplerSel": SamplerSel,
+    "SchedulerSel": SchedulerSel,
+    #"LoraFluxParams": LoraFluxParams,
+}
+NODE_DISPLAY_NAME_MAPPINGS = {
+    "EmptyLatentSize": prefix + "EmptyLatentSize",
+    "EmptyLatentSize64": prefix + "EmptyLatentSize64",
+    "SamplerSel": prefix + "SamplerSel",
+    "SchedulerSel": prefix + "SchedulerSel",
+    #"LoraFluxParams": prefix + "LoraFluxParams",
+}
+

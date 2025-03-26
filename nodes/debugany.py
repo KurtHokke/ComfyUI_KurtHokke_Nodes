@@ -1,7 +1,7 @@
-from ..utils import CATEGORY, any, prefix
-from ..helpers import DataHandler
-from ..helpers import ConfigManager, restricted_import, original_import
-from ..loggers import get_logger
+from khn.utils import CATEGORY, any, prefix
+from khn.helpers import DataHandler
+from khn.helpers import ConfigManager, restricted_import, original_import
+from khn.loggers import get_logger
 import builtins
 import black
 import json
@@ -124,3 +124,10 @@ class DebugAny:
                 return self.done(x=str(script_saved))
             except Exception as e:
                 return self.done(x=f"Error: {e}",)
+
+NODE_CLASS_MAPPINGS = {
+    "DebugAny": DebugAny,
+}
+NODE_DISPLAY_NAME_MAPPINGS = {
+    "DebugAny": prefix + "DebugAny",
+}

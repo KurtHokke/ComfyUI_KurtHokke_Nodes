@@ -2,7 +2,7 @@
 #Stolen from https://github.com/mcmonkeyprojects/sd-dynamic-thresholding
 #Thanks!
 
-from ..utils import CATEGORY, prefix
+from khn.utils import CATEGORY, prefix
 #from custom_nodes.sd-dynamic-thresholding.dynthres_core import DynThresh
 import importlib
 
@@ -102,3 +102,13 @@ class DynamicThresholdingBasic:
         m = model.clone()
         m.set_model_sampler_cfg_function(sampler_dyn_thresh)
         return (m, )
+
+
+NODE_CLASS_MAPPINGS = {
+    "DynamicThresholding": DynamicThresholding,
+    "DynamicThresholdingBasic": DynamicThresholdingBasic,
+}
+NODE_DISPLAY_NAME_MAPPINGS = {
+    "DynamicThresholding": prefix + "DynamicThresholding",
+    "DynamicThresholdingBasic": prefix + "DynamicThresholdingBasic",
+}

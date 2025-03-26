@@ -1,8 +1,8 @@
 import folder_paths
 import node_helpers
-from ..utils import CATEGORY, NONE_EMBEDDINGS, any, prefix
-from ..loggers import get_logger
-from ..helpers import DataHandler
+from khn.utils import CATEGORY, NONE_EMBEDDINGS, any, prefix
+from khn.loggers import get_logger
+from khn.helpers import DataHandler
 from comfy.comfy_types import IO, ComfyNodeABC, InputTypeDict
 import random
 import torch
@@ -62,20 +62,6 @@ class splitcond:
         cond2 = conditioning[1]
         return (cond1, cond2)
 
-class ConditioningSetAreaStrength:
-    @classmethod
-    def INPUT_TYPES(s):
-        return {"required": {"conditioning": ("CONDITIONING", ),
-                              "strength": ("FLOAT", {"default": 1.0, "min": 0.0, "max": 10.0, "step": 0.01}),
-                             }}
-    RETURN_TYPES = ("CONDITIONING",)
-    FUNCTION = "append"
-
-    CATEGORY = "conditioning"
-
-    def append(self, conditioning, strength):
-        c = node_helpers.conditioning_set_values(conditioning, {"strength": strength})
-        return (c, )
 
 @log_all
 class ApplyCondsExtraOpts:
@@ -306,3 +292,17 @@ class ChainText(ComfyNodeABC):
         return (cliptext_pipe,)
 
 
+NODE_CLASS_MAPPINGS = {
+    "ChainTextEncode": ChainTextEncode,
+    "ChainText": ChainText,
+    #"mycombine": mycombine,
+    #"splitcond": splitcond,
+    "ApplyCondsExtraOpts": ApplyCondsExtraOpts,
+}
+NODE_DISPLAY_NAME_MAPPINGS = {
+    "ChainTextEncode": prefix + "ChainTextEncode",
+    "ChainText": prefix + "ChainText",
+    #"mycombine": prefix + "mycombine",
+    #"splitcond": prefix + "splitcond",
+    "ApplyCondsExtraOpts": prefix + "ApplyCondsExtraOpts",
+}

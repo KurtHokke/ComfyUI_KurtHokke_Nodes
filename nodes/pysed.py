@@ -1,5 +1,5 @@
-from ..utils import CATEGORY, prefix
-from ..packages.PythonSed import Sed, SedException
+from khn.utils import CATEGORY, prefix
+from khn.packages.PythonSed import Sed, SedException
 import io
 import re
 
@@ -46,3 +46,9 @@ class SedOnString:
             return ("", )  # Return an empty string on error
 
 
+NODE_CLASS_MAPPINGS = {
+    "SedOnString": SedOnString,
+}
+NODE_DISPLAY_NAME_MAPPINGS = {
+    "SedOnString": prefix + "SedOnString",
+}

@@ -1,4 +1,4 @@
-from ..utils import CATEGORY, any, prefix
+from khn.utils import CATEGORY, any, prefix
 from custom_nodes.ControlFlowUtils.Helpers import replace_caseless, cint, cbool, safe_eval, filter_node_id, debug_print
 import json
 import re

@@ -1,4 +1,4 @@
-from ..utils import CATEGORY, prefix
+from khn.utils import CATEGORY, prefix
 
 class str_str:
     @classmethod
@@ -39,3 +39,12 @@ class str_str_str_str:
         joined_string = string_1 + delimiter + string_2 + delimiter + string_3 + delimiter + string_4
         return (joined_string, )
 
+
+NODE_CLASS_MAPPINGS = {
+    "str_str": str_str,
+    "str_str_str_str": str_str_str_str,
+}
+NODE_DISPLAY_NAME_MAPPINGS = {
+    "str_str": prefix + "str_str",
+    "str_str_str_str": prefix + "str_str_str_str",
+}

@@ -1,6 +1,6 @@
-from ..utils import CATEGORY, MODEL_TYPES, any, prefix
-from ..loggers import get_logger
-from ..core import SampleAssembler
+from khn.utils import CATEGORY, MODEL_TYPES, any, prefix
+from khn.loggers import get_logger
+from khn.core import SampleAssembler
 from comfy.comfy_types import *
 import comfy.samplers
 from comfy_extras.nodes_custom_sampler import SamplerCustomAdvanced, BasicScheduler, BetaSamplingScheduler
@@ -165,3 +165,15 @@ class extGSSS:
             gsss = {**gsss, "samples": samples}
         g_s_s_s = gsss
         return (g_s_s_s, )
+
+
+NODE_CLASS_MAPPINGS = {
+    "AIO": AIO,
+    "SCA_Pipe": SCA_Pipe,
+    "extGSSS": extGSSS,
+}
+NODE_DISPLAY_NAME_MAPPINGS = {
+    "AIO": prefix + "AIO",
+    "SCA_Pipe": prefix + "SCA_Pipe",
+    "extGSSS": prefix + "extGSSS",
+}

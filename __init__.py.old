@@ -106,7 +106,6 @@ NODE_CLASS_MAPPINGS = {
     "SCA_Pipe": SCA_Pipe,
     "extGSSS": extGSSS,
 }
-
 NODE_DISPLAY_NAME_MAPPINGS = {
     "Node_BOOL": prefix + "BOOL",
     "Node_INT": prefix + "INT",

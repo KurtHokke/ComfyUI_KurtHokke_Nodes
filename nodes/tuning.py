@@ -1,4 +1,4 @@
-from ..utils import CATEGORY, MODEL_TYPES, any, logger, prefix
+from khn.utils import CATEGORY, MODEL_TYPES, any, logger, prefix
 from comfy.comfy_types import *
 import node_helpers
 import comfy.samplers
@@ -81,7 +81,7 @@ class AIO_Tuner_Pipe:
         if extra_opts == {}:
             extra_opts = None
         if extra_opts is not None and "cond" in extra_opts and len(positive) == 2:
-            from ..nodes.cond import ApplyCondsExtraOpts
+            from khn.nodes.cond import ApplyCondsExtraOpts
             get_applycondsextraopts = ApplyCondsExtraOpts()
             if "seed" not in extra_opts:
                 extra_opts5 = {"seed": noise_seed}
@@ -314,23 +314,11 @@ class SamplerCustomAdvanced_Pipe:
 
 
 
-
-'''
-class FluxGuidance:
-    @classmethod
-    def INPUT_TYPES(s):
-        return {"required": {
-            "conditioning": ("CONDITIONING", ),
-            "guidance": ("FLOAT", {"default": 3.5, "min": 0.0, "max": 100.0, "step": 0.1}),
-            }}
-
-    RETURN_TYPES = ("CONDITIONING",)
-    FUNCTION = "append"
-
-    CATEGORY = "advanced/conditioning/flux"
-
-    def append(self, conditioning, guidance):
-        c = node_helpers.conditioning_set_values(conditioning, {"guidance": guidance})
-        return (c, )
-'''
-
+NODE_CLASS_MAPPINGS = {
+    "AIO_Tuner_Pipe": AIO_Tuner_Pipe,
+    "SamplerCustomAdvanced_Pipe": SamplerCustomAdvanced_Pipe,
+}
+NODE_DISPLAY_NAME_MAPPINGS = {
+    "AIO_Tuner_Pipe": prefix + "AIO_Tuner_Pipe",
+    "SamplerCustomAdvanced_Pipe": prefix + "SamplerCustomAdvanced_Pipe",
+}

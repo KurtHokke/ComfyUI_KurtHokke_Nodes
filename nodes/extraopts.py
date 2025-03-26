@@ -1,5 +1,5 @@
-from ..utils import CATEGORY, COND_OPTS, COND_DIRECTION, NONE_LORAS, any, prefix
-from ..loggers import get_logger
+from khn.utils import CATEGORY, COND_OPTS, COND_DIRECTION, NONE_LORAS, any, prefix
+from khn.loggers import get_logger
 from nodes import MAX_RESOLUTION
 from custom_nodes.was_extras.ConditioningBlend import blending_modes
 from comfy.comfy_types import *
@@ -531,3 +531,41 @@ class batchsize_ExtraOpts:
             extra_opts = extra_opts1
 
         return (extra_opts, )
+
+
+NODE_CLASS_MAPPINGS = {
+    "ViewExtraOpts": ViewExtraOpts,
+    "MergeExtraOpts": MergeExtraOpts,
+    "VAE_ExtraOpts": VAE_ExtraOpts,
+    "COND_ExtraOpts": COND_ExtraOpts,
+    "COND_ExtraOpts_2": COND_ExtraOpts_2,
+    "COND_SET_STRENGTH_ExtraOpts": COND_SET_STRENGTH_ExtraOpts,
+    "MultiplyTensorsExtraOpts": MultiplyTensorsExtraOpts,
+    "TensorsExtraOpts": TensorsExtraOpts,
+    "batchsize_ExtraOpts": batchsize_ExtraOpts,
+    "SEED_ExtraOpts": SEED_ExtraOpts,
+    "NoNegExtraOpts": NoNegExtraOpts,
+    "LoraNamesExtraOpts": LoraNamesExtraOpts,
+    "LoraSettingsExtraOpts": LoraSettingsExtraOpts,
+    "KeyframeExtraOpts": KeyframeExtraOpts,
+    "CondNoEmptyNegExtraOpts": CondNoEmptyNegExtraOpts,
+    "FluxExtraOpts": FluxExtraOpts,
+}
+NODE_DISPLAY_NAME_MAPPINGS = {
+    "ViewExtraOpts": prefix + "ViewExtraOpts",
+    "MergeExtraOpts": prefix + "MergeExtraOpts",
+    "VAE_ExtraOpts": prefix + "VAE_ExtraOpts",
+    "COND_ExtraOpts": prefix + "COND_ExtraOpts",
+    "COND_ExtraOpts_2": prefix + "COND_ExtraOpts_2",
+    "COND_SET_STRENGTH_ExtraOpts": prefix + "COND_SET_STRENGTH_ExtraOpts",
+    "MultiplyTensorsExtraOpts": prefix + "MultiplyTensorsExtraOpts",
+    "TensorsExtraOpts": prefix + "TensorsExtraOpts",
+    "batchsize_ExtraOpts": prefix + "batchsize_ExtraOpts",
+    "SEED_ExtraOpts": prefix + "SEED_ExtraOpts",
+    "NoNegExtraOpts": prefix + "NoNegExtraOpts",
+    "LoraNamesExtraOpts": prefix + "LoraNamesExtraOpts",
+    "LoraSettingsExtraOpts": prefix + "LoraSettingsExtraOpts",
+    "KeyframeExtraOpts": prefix + "KeyframeExtraOpts",
+    "CondNoEmptyNegExtraOpts": prefix + "CondNoEmptyNegExtraOpts",
+    "FluxExtraOpts": prefix + "FluxExtraOpts",
+}

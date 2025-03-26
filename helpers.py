@@ -1,7 +1,7 @@
 from typing import List, Union, Optional
 from pathlib import Path
 import folder_paths
-from .loggers import get_logger
+from khn.loggers import get_logger
 import os
 import re
 import importlib.util

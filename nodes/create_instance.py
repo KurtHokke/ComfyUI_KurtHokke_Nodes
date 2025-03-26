@@ -1,6 +1,6 @@
-from ..utils import CATEGORY, anytype, prefix
-from ..helpers import check_string, find_and_import_class
-from ..loggers import get_logger
+from khn.utils import CATEGORY, anytype, prefix
+from khn.helpers import check_string, find_and_import_class
+from khn.loggers import get_logger
 from comfy.comfy_types import IO, InputTypeDict
 import sys
 import re
@@ -74,3 +74,9 @@ class CreateInstance:
         # If no class matches
         return self.done(f"No class or valid format found for '{x_eq}'")
 
+NODE_CLASS_MAPPINGS = {
+    "CreateInstance": CreateInstance,
+}
+NODE_DISPLAY_NAME_MAPPINGS = {
+    "CreateInstance": prefix + "CreateInstance",
+}

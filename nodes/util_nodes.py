@@ -1,5 +1,5 @@
-from ..utils import CATEGORY, any, logger, OPERATIONS, prefix
-from ..helpers import DataHandler
+from khn.utils import CATEGORY, any, logger, OPERATIONS, prefix
+from khn.helpers import DataHandler
 from comfy.comfy_types import *
 
 

@@ -9,8 +9,8 @@ import comfy.utils
 import comfy.hooks
 from comfy_extras.nodes_hooks import CreateHookLora
 import folder_paths
-from ..utils import CATEGORY, NONE_EMBEDDINGS, prefix
-from ..loggers import get_logger
+from khn.utils import CATEGORY, NONE_EMBEDDINGS, prefix
+from khn.loggers import get_logger
 from comfy.comfy_types import IO, ComfyNodeABC, InputTypeDict
 
 logger, log_all = get_logger("log_all")
@@ -235,60 +235,15 @@ class SetHookKeyframes:
         return (hooks,)
 
 
-
-'''
-class AIO_Hooks:
-    @classmethod
-    def INPUT_TYPES(s):
-        return {
-            "required": {
-                "loras": ("LORA_NAMES", ),
-                "apply_clip_hooks": ("BOOLEAN", {"default": True}),
-                "apply_cond_hooks": ("BOOLEAN", {"default": True}),
-            },
-            "optional": {
-                "clip": (IO.CLIP,),
-                "prev_hooks": ("HOOKS",),
-                "prev_hook_kf": ("HOOK_KEYFRAMES",),
-                "extra_opts": ("EXTRA_OPTS",),
-            }
-        }
-    RETURN_TYPES = ("HOOKS",)
-    CATEGORY = CATEGORY.MAIN.value + CATEGORY.HOOKS.value
-    FUNCTION = "create_hook_with_kf"
-
-    def create_hook_with_kf(self, loras: dict, clip=None, prev_hooks=None, prev_hook_kf=None, extra_opts=None):
-        HookInstance = HookHandler()
-        lora_starts = []
-        lora_configs = []
-        for i in range(1, 5):  # Processes "lora_1" to "lora_4"
-            lora_name_key = f"lora_name_{i}"
-            lora_settings_key = f"lora_settings_{i}"
-            interpolation_key = f"interpolation_{i}"
-            if lora_name_key in loras:
-                lora_name = loras[lora_name_key]
-                lora_settings = loras[lora_settings_key]
-                interpolation = loras[interpolation_key]
-                lora_strength, lora_start, lora_end = [float(value) for value in lora_settings.split(",")]
-                lora_configs.append({
-                    "name": lora_name,
-                    "strength": lora_strength,
-                    "start": lora_start,
-                    "end": lora_end,
-                    "interpolation": interpolation
-                })
-                lora_starts.append(lora_start)
-        lora_configs.sort(key=lambda x: x["start"])
-
-        for idx, lora_config in enumerate(lora_configs):
-            if idx == 0:  # First Lora
-                prev_hooks = HookInstance.create_hook_helper(HookInstance, lora_config, prev_hooks=prev_hooks)
-                prev_hook_kf = HookInstance.create_hook_kf_helper(HookInstance, lora_config, prev_hook_kf=prev_hook_kf)
-
-            else:  # Remaining Loras
-                prev_hooks = HookInstance.create_hook_helper(HookInstance, lora_config, prev_hooks=prev_hooks)
-                prev_hook_kf = HookInstance.create_hook_kf_helper(HookInstance, lora_config, prev_hook_kf=prev_hook_kf)
-
-        return (hooks,)
-
-'''
+NODE_CLASS_MAPPINGS = {
+    "CreateHookLoraTestSelf": CreateHookLoraTestSelf,
+    "CreateHookWithKF": CreateHookWithKF,
+    "SetModelHooksOnCond": SetModelHooksOnCond,
+    "expHook": expHook,
+}
+NODE_DISPLAY_NAME_MAPPINGS = {
+    "CreateHookLoraTestSelf": prefix + "CreateHookLoraTestSelf",
+    "CreateHookWithKF": prefix + "CreateHookWithKF",
+    "SetModelHooksOnCond": prefix + "SetModelHooksOnCond",
+    "expHook": prefix + "expHook",
+}

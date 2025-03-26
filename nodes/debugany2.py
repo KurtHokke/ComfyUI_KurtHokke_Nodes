@@ -1,6 +1,6 @@
-from ..utils import CATEGORY, anytype, prefix
-from ..helpers import ConfigManager
-from ..loggers import get_logger
+from khn.utils import CATEGORY, anytype, prefix
+from khn.helpers import ConfigManager
+from khn.loggers import get_logger
 from comfy.comfy_types import IO, InputTypeDict
 import re
 
@@ -140,4 +140,11 @@ class DebugAny2:
             return self.done(x=f"Error: ")
 
 
-
+NODE_CLASS_MAPPINGS = {
+    "DebugAny2": DebugAny2,
+    "DebugAny3": DebugAny3,
+}
+NODE_DISPLAY_NAME_MAPPINGS = {
+    "DebugAny2": prefix + "DebugAny2",
+    "DebugAny3": prefix + "DebugAny3",
+}

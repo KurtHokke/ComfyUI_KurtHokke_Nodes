@@ -7,7 +7,7 @@ import comfy.sd
 import comfy.utils
 import comfy.hooks
 import folder_paths
-from .utils import logger, CATEGORY
+from khn.utils import logger, CATEGORY
 import torch
 
 class HookHandler:

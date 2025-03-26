@@ -1,4 +1,4 @@
-from ..utils import CATEGORY, prefix
+from khn.utils import CATEGORY, prefix
 import json
 import folder_paths
 import re
@@ -58,3 +58,9 @@ class get_lora_metadata:
             return None, None
 
 
+NODE_CLASS_MAPPINGS = {
+    "get_lora_metadata": get_lora_metadata,
+}
+NODE_DISPLAY_NAME_MAPPINGS = {
+    "get_lora_metadata": prefix + "get_lora_metadata",
+}

@@ -4,7 +4,7 @@ https://github.com/crystian/ComfyUI-Crystools
 https://github.com/cubiq/ComfyUI_essentials
   Many thanks goes to these awesome developers!
 '''
-from ..utils import CATEGORY, any, BOOLEAN, INT, FLOAT, STRING, prefix
+from khn.utils import CATEGORY, any, BOOLEAN, INT, FLOAT, STRING, prefix
 import math
 import torch
 import time
@@ -192,3 +192,15 @@ class ExpMathQuad:
 
     def execute(self, value_1, value_2, value_3, value_4, a = 0.0, b = 0.0, c = 0.0, d = 0.0, e = 0.0, f = 0.0):
         return ExpMath().execute(value_1, a, b, c, d, e, f) + ExpMath().execute(value_2, a, b, c, d, e, f) + ExpMath().execute(value_3, a, b, c, d, e, f) + ExpMath().execute(value_4, a, b, c, d, e, f)
+
+
+NODE_CLASS_MAPPINGS = {
+    "ExpMath": ExpMath,
+    "ExpMathDual": ExpMathDual,
+    "ExpMathQuad": ExpMathQuad,
+}
+NODE_DISPLAY_NAME_MAPPINGS = {
+    "ExpMath": prefix + "ExpMath",
+    "ExpMathDual": prefix + "ExpMathDual",
+    "ExpMathQuad": prefix + "ExpMathQuad",
+}
