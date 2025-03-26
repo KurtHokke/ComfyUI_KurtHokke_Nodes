@@ -1,4 +1,4 @@
-from ..utils import CATEGORY
+from ..utils import CATEGORY, prefix
 
 class str_str:
     @classmethod

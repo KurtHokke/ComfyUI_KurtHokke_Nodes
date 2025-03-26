@@ -1,4 +1,4 @@
-from ..utils import CATEGORY
+from ..utils import CATEGORY, prefix
 import folder_paths
 import os
 from io import BytesIO

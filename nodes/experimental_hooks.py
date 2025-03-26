@@ -9,7 +9,7 @@ import comfy.utils
 import comfy.hooks
 from comfy_extras.nodes_hooks import CreateHookLora
 import folder_paths
-from ..utils import CATEGORY, NONE_EMBEDDINGS
+from ..utils import CATEGORY, NONE_EMBEDDINGS, prefix
 from ..loggers import get_logger
 from comfy.comfy_types import IO, ComfyNodeABC, InputTypeDict
 

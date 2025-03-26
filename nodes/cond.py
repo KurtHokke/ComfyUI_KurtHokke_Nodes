@@ -1,6 +1,6 @@
 import folder_paths
 import node_helpers
-from ..utils import CATEGORY, NONE_EMBEDDINGS, any
+from ..utils import CATEGORY, NONE_EMBEDDINGS, any, prefix
 from ..loggers import get_logger
 from ..helpers import DataHandler
 from comfy.comfy_types import IO, ComfyNodeABC, InputTypeDict

@@ -1,4 +1,4 @@
-from ..utils import CATEGORY
+from ..utils import CATEGORY, prefix
 import comfy.sd
 import folder_paths
 

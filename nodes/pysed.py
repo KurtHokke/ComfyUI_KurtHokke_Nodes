@@ -1,4 +1,4 @@
-from ..utils import CATEGORY
+from ..utils import CATEGORY, prefix
 from ..packages.PythonSed import Sed, SedException
 import io
 import re

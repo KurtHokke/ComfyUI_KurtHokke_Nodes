@@ -1,4 +1,4 @@
-from ..utils import CATEGORY, any, logger, OPERATIONS
+from ..utils import CATEGORY, any, logger, OPERATIONS, prefix
 from ..helpers import DataHandler
 from comfy.comfy_types import *
 
@@ -283,3 +283,32 @@ class DetailDaemonPrimitive:
 
     def execute(self, detail_amount, start, end, bias, exponent, start_offset, end_offset, fade, smooth, cfg_scale_override):
         return (detail_amount, start, end, bias, exponent, start_offset, end_offset, fade, smooth, cfg_scale_override)
+
+
+NODE_CLASS_MAPPINGS = {
+    "Node_BOOL": Node_BOOL,
+    "Node_INT": Node_INT,
+    "Node_Float": Node_Float,
+    "Node_String": Node_String,
+    "Node_StringMultiline": Node_StringMultiline,
+    "Node_RandomRange": Node_RandomRange,
+    "CompareTorch": CompareTorch,
+    "DoOperations": DoOperations,
+    "TensorStats": TensorStats,
+    "TensorToConditioning": TensorToConditioning,
+    "DetailDaemonPrimitive": DetailDaemonPrimitive,
+}
+
+NODE_DISPLAY_NAME_MAPPINGS = {
+    "Node_BOOL": prefix + "BOOL",
+    "Node_INT": prefix + "INT",
+    "Node_Float": prefix + "Float",
+    "Node_String": prefix + "String",
+    "Node_StringMultiline": prefix + "StringMultiline",
+    "Node_RandomRange": prefix + "RandomRange",
+    "CompareTorch": prefix + "CompareTorch",
+    "DoOperations": prefix + "DoOperations",
+    "TensorStats": prefix + "TensorStats",
+    "TensorToConditioning": prefix + "TensorToConditioning",
+    "DetailDaemonPrimitive": prefix + "DetailDaemonPrimitive",
+}

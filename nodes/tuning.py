@@ -1,4 +1,4 @@
-from ..utils import CATEGORY, MODEL_TYPES, any, logger
+from ..utils import CATEGORY, MODEL_TYPES, any, logger, prefix
 from comfy.comfy_types import *
 import node_helpers
 import comfy.samplers

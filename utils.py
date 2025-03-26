@@ -60,7 +60,7 @@ class EmojiCategoriesEnabled:
         EXTRAOPTS = "/⚙️extraopts"
         HOOKS = "/🪝hooks"
 
-        prefix = '>🛸 '
+
 
     def show_categories(self):
         print("Using categories with emojis!")
@@ -79,7 +79,7 @@ class EmojiCategoriesDisabled:
         EXTRAOPTS = "/extraopts"
         HOOKS = "/hooks"
 
-        prefix = '> '
+
 
     def show_categories(self):
         print("Using categories without emojis!")
@@ -90,8 +90,21 @@ feature_enabled = get_feature_flag()
 
 if feature_enabled:
     CATEGORY = EmojiCategoriesEnabled.CATEGORYEMOJI
+    prefix = '>🛸 '
 else:
     CATEGORY = EmojiCategoriesDisabled.CATEGORYNOEMOJI
+    prefix = '> '
+
+def get_node_dir(subpath=None, mkdir=False):
+    nodedir = os.path.dirname(__file__)
+    if subpath is not None:
+        nodedir = os.path.join(nodedir, subpath)
+
+    nodedir = os.path.abspath(nodedir)
+
+    if mkdir and not os.path.exists(nodedir):
+        os.makedirs(nodedir)
+    return nodedir
 
 
 FLOAT = ("FLOAT", {"default": 1,

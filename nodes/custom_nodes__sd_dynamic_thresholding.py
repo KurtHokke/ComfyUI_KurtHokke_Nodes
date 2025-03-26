@@ -2,7 +2,7 @@
 #Stolen from https://github.com/mcmonkeyprojects/sd-dynamic-thresholding
 #Thanks!
 
-from ..utils import CATEGORY
+from ..utils import CATEGORY, prefix
 #from custom_nodes.sd-dynamic-thresholding.dynthres_core import DynThresh
 import importlib
 

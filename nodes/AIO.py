@@ -1,8 +1,9 @@
-from ..utils import CATEGORY, MODEL_TYPES, any
+from ..utils import CATEGORY, MODEL_TYPES, any, prefix
 from ..loggers import get_logger
 from ..core import SampleAssembler
 from comfy.comfy_types import *
 import comfy.samplers
+from comfy_extras.nodes_custom_sampler import SamplerCustomAdvanced, BasicScheduler, BetaSamplingScheduler
 from nodes import MAX_RESOLUTION
 import torch
 
@@ -44,32 +45,98 @@ class AIO:
     def determine_sample_settings(self, cfg_guidance: float, sampler_name: list[str], scheduler: list[str],
                                   steps: int, denoise: float, width: int, height: int, noise_seed: int,
                                   model=None, vae=None, pos=None, neg=None, g_s_s_s=None, extra_opts=None) -> tuple[list[any]]:
-
-        sca_pipe = [cfg_guidance, sampler_name, scheduler, steps, denoise, width, height, noise_seed, model, vae, extra_opts]
-        if g_s_s_s is not None:
-            return (sca_pipe, )
-        clip = pos[0]
-        models = [model, clip, vae]
+        if extra_opts is None:
+            extra_opts = {}
+        if pos is not None:
+            clip = pos[0]
+            pos = pos[1]
+            if neg is not None:
+                neg = neg[1]
+            sca_dict = {
+                "model": model,
+                "clip": clip,
+                "vae": vae,
+                "pos": pos,
+                "neg": neg,
+                "cfg_guid": cfg_guidance,
+                "sampler_name": sampler_name,
+                "scheduler": scheduler,
+                "steps": steps,
+                "denoise": denoise,
+                "width": width,
+                "height": height,
+                "g_s_s_s": g_s_s_s,
+                "extra_opts": extra_opts,
+            }
+        else:
+            return logger.info("No positive prompts provided")
         if self.processAIO is None:
-            self.processAIO = SampleAssembler(models)
-        pos_prompt = []
-        neg_prompt = []
-        for i in range(1, len(pos)):
-            pos_prompt.append(pos[i])
-        if neg is not None:
-            for i in range(1, len(neg)):
-                neg_prompt.append(neg[i])
-        self.processAIO.set_conds(cfg_guidance, pos_prompts=pos_prompt)
-        latent, noise = self.processAIO.get_latent_noise(latent_opts=[width, height], noise_seed=noise_seed)
-        #latent = latent
-        guider = self.processAIO.get_guider()
-        sigmas = self.processAIO.get_sigmas(scheduler=scheduler, steps=steps, denoise=denoise)
-        sampler = comfy.samplers.sampler_object(sampler_name)
+            self.processAIO = SampleAssembler(sca_dict)
 
-        sca_pipe = noise, guider, sampler, sigmas, latent, vae, extra_opts
+        sca_pipe = self.processAIO.update(sca_dict, noise_seed)
+
         return (sca_pipe, )
-        #return (f"{conds["t5xxl"]}\n{conds["clip_l"]}", )
 
+class SCA_Pipe:
+    def __init__(self):
+        pass
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "SCA_PIPE": ("SCA_PIPE", ),
+            }
+        }
+
+    RETURN_TYPES = ("IMAGE", "LATENT", )
+    RETURN_NAMES = ("decoded_image", "output_samples", )
+
+    FUNCTION = "get_sample"
+
+    CATEGORY = CATEGORY.MAIN.value + CATEGORY.ADVANCED.value
+
+    def decode(self, vae, samples):
+        images = vae.decode(samples["samples"])[0]
+
+        if len(images.shape) == 5:
+            images = images.reshape(-1, images.shape[-3], images.shape[-2], images.shape[-1])
+        return (images, )
+
+    def decode_tiled(self, vae, samples, tile_size, overlap=64, temporal_size=64, temporal_overlap=8):
+        if tile_size < overlap * 4:
+            overlap = tile_size // 4
+        if temporal_size < temporal_overlap * 2:
+            temporal_overlap = temporal_overlap // 2
+        temporal_compression = vae.temporal_compression_decode()
+        if temporal_compression is not None:
+            temporal_size = max(2, temporal_size // temporal_compression)
+            temporal_overlap = max(1, min(temporal_size // 2, temporal_overlap // temporal_compression))
+        else:
+            temporal_size = None
+            temporal_overlap = None
+
+        compression = vae.spacial_compression_decode()
+        images = vae.decode_tiled(samples["samples"], tile_x=tile_size // compression, tile_y=tile_size // compression, overlap=overlap // compression, tile_t=temporal_size, overlap_t=temporal_overlap)[0]
+        if len(images.shape) == 5:
+            images = images.reshape(-1, images.shape[-3], images.shape[-2], images.shape[-1])
+        return (images, )
+
+    def get_sample(self, SCA_PIPE):
+
+        get_samplercustomadvanced = SamplerCustomAdvanced()
+
+        noise = SCA_PIPE["noise"]
+        guider = SCA_PIPE["guider"]
+        sampler = SCA_PIPE["sampler"]
+        sigmas = SCA_PIPE["sigmas"]
+        latent = SCA_PIPE["samples"]
+        vae = SCA_PIPE["vae"]
+
+        out = get_samplercustomadvanced.sample(noise, guider, sampler, sigmas, latent)[0]
+        images = self.decode(vae, out)
+
+        return (images, out, )
 
 class extGSSS:
     @classmethod
@@ -87,5 +154,14 @@ class extGSSS:
     FUNCTION = "pack_gsss"
     CATEGORY = CATEGORY.MAIN.value
     def pack_gsss(self, guider=None, sampler=None, sigmas=None, samples=None):
-        gsss = [guider, sampler, sigmas, samples]
-        return (gsss, )
+        gsss = {}
+        if guider is not None:
+            gsss = {**gsss, "guider": guider}
+        if sampler is not None:
+            gsss = {**gsss, "sampler": sampler}
+        if sigmas is not None:
+            gsss = {**gsss, "sigmas": sigmas}
+        if samples is not None:
+            gsss = {**gsss, "samples": samples}
+        g_s_s_s = gsss
+        return (g_s_s_s, )

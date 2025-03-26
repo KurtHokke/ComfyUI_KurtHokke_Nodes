@@ -1,5 +1,5 @@
 from .. import utils
-from ..utils import CATEGORY, any, logger, CLIP_DTYPES
+from ..utils import CATEGORY, any, logger, CLIP_DTYPES, prefix
 
 from typing import TYPE_CHECKING, Union
 import logging

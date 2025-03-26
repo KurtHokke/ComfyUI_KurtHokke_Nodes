@@ -1,4 +1,4 @@
-from ..utils import CATEGORY, COND_OPTS, COND_DIRECTION, NONE_LORAS, any
+from ..utils import CATEGORY, COND_OPTS, COND_DIRECTION, NONE_LORAS, any, prefix
 from ..loggers import get_logger
 from nodes import MAX_RESOLUTION
 from custom_nodes.was_extras.ConditioningBlend import blending_modes
@@ -166,6 +166,54 @@ class LoraNamesExtraOpts:
                 lora_settings = {**lora_settings, "interpolation_4": "linear"}
         loranames = {**lora_settings, **loranames}
         return (loranames, )
+
+class FluxExtraOpts:
+    @classmethod
+    def INPUT_TYPES(s):
+        return {"required": {
+                    "fluxencode_neg": ("BOOLEAN", {"default": False, "label_on": "On", "label_off": "Off"} ),
+                },
+                "optional": {
+                    "prev_opts": ("EXTRA_OPTS", ),
+                }
+        }
+    RETURN_TYPES = ("EXTRA_OPTS", )
+    RETURN_NAMES = ("extra_opts", )
+    FUNCTION = "pack_extra_opts"
+    CATEGORY = CATEGORY.MAIN.value + CATEGORY.EXTRAOPTS.value
+    def pack_extra_opts(self, fluxencode_neg, prev_opts=None):
+        extra_opts = {}
+        if prev_opts is None:
+            prev_opts = {}
+        if fluxencode_neg is True:
+            extra_opts = {"fluxencode_neg": True}
+        get_merged_opts = MergeExtraOpts()
+        extra_opts = get_merged_opts.merge_extra_opts(prev_opts, extra_opts)
+        return (extra_opts, )
+
+class CondNoEmptyNegExtraOpts:
+    @classmethod
+    def INPUT_TYPES(s):
+        return {"required": {
+                    "skip_emptyneg": ("BOOLEAN", {"default": True, "label_on": "On", "label_off": "Off"} ),
+                },
+                "optional": {
+                    "prev_opts": ("EXTRA_OPTS", ),
+                }
+        }
+    RETURN_TYPES = ("EXTRA_OPTS", )
+    RETURN_NAMES = ("extra_opts", )
+    FUNCTION = "pack_extra_opts"
+    CATEGORY = CATEGORY.MAIN.value + CATEGORY.EXTRAOPTS.value
+    def pack_extra_opts(self, skip_emptyneg, prev_opts=None):
+        extra_opts = {}
+        if prev_opts is None:
+            prev_opts = {}
+        if skip_emptyneg is True:
+            extra_opts = {"skip_emptyneg": True}
+        get_merged_opts = MergeExtraOpts()
+        extra_opts = get_merged_opts.merge_extra_opts(prev_opts, extra_opts)
+        return (extra_opts, )
 
 
 class MultiplyTensorsExtraOpts:

@@ -1,4 +1,4 @@
-from ..utils import CATEGORY, parse_string_to_list
+from ..utils import CATEGORY, parse_string_to_list, prefix
 import comfy.model_management
 from nodes import MAX_RESOLUTION
 import torch
