@@ -1,8 +1,10 @@
 from khn.loggers import get_logger
+from .helpers import multiply_tensors
 from comfy.samplers import CFGGuider, sampler_object
 from comfy.comfy_types import IO, InputTypeDict
 from comfy_extras.nodes_flux import CLIPTextEncodeFlux, FluxGuidance
 from comfy_extras.nodes_custom_sampler import BasicScheduler, BasicGuider, CFGGuider, Noise_RandomNoise
+from comfy_extras.nodes_cfg import CFGZeroStar
 from nodes import CLIPTextEncode, ConditioningZeroOut, EmptyLatentImage
 from comfy_extras.nodes_sd3 import EmptySD3LatentImage
 import torch
@@ -11,14 +13,19 @@ logger, decoDebug = get_logger("all")
 
 @decoDebug
 class SampleAssembler:
-    def __init__(self, sca_dict):
+    def __init__(self, sca_dict, debug=False):
         self.sca_dict = sca_dict.copy()
         self.basic_scheduler = BasicScheduler()
-        self._start(init=True)
+        self.debug = debug
+        if self.debug:
+            self._debug_get_dicts = self._update__get_dicts()
+        else:
+            self._start(init=True)
 
     def _start(self, init=False):
         if init:
             self._vaeattr()
+        self._patch("before_guider")
         self._get_dicts = self._update__get_dicts()
         self._get_guider()
         self._get_sampler()
@@ -55,12 +62,26 @@ class SampleAssembler:
                 self.cond_zero_out = ConditioningZeroOut()
             elif x == "sdlatent" and not hasattr(self, "sdlatent"):
                 self.sdlatent = EmptyLatentImage()
+            elif x == "cfg_zero_star" and not hasattr(self, "cfg_zero_star"):
+                self.cfg_zero_star = CFGZeroStar()
             else:
                 logger.info(f"Error: _instance() {x}")
                 return None
 
-    def update(self, sca_dict, noise_seed):
+    def update(self, sca_dict, noise_seed, debug=False):
         noise = Noise_RandomNoise(noise_seed)
+        if self.debug and not debug or not self.debug and debug:
+            self.debug = debug
+            self._start(init=True)
+        if self.debug:
+
+            self._debug_get_dicts = self._update__get_dicts()
+            model, clip, pos, neg, cfg_guid = self._getitem(self._debug_get_dicts["guider_dict"])
+            return [model, clip, pos, neg, cfg_guid]
+            #return {**self._debug_get_dicts, "noise": noise}
+        self.sca_dict = sca_dict.copy()
+        self._start()
+        return {**self.sca_pipe, "noise": noise}
         if sca_dict == self.sca_dict:
             return {**self.sca_pipe, "noise": noise}
         else:
@@ -120,6 +141,17 @@ class SampleAssembler:
                 return
         self._assemble_pipe()
 
+    def _cfg_zero_star(self):
+        self._instance("cfg_zero_star")
+        model = self.cfg_zero_star.patch(self.sca_dict["model"])[0]
+        self.sca_dict["model"] = model
+
+    def _patch(self, when):
+        extra_opts = self.sca_dict["extra_opts"]
+        if when == "before_guider":
+            if "cfg_zero_star" in extra_opts:
+                self._cfg_zero_star()
+
     def _guider(self, model, cfg_guid, neg=False):
         if neg:
             self._instance("cfgguider")
@@ -130,6 +162,8 @@ class SampleAssembler:
 
     def _get_guider(self, changed="ALL"):
         model, clip, pos, neg, cfg_guid = self._getitem(self._get_dicts["guider_dict"])
+        extra_opts = self.sca_dict["extra_opts"]
+        logger.debug(f"clip: {clip}")
         if self.latent_ch == 16:
             self.pos_cond = self.fluxclip.encode(clip=clip, clip_l=pos[1], t5xxl=pos[0], guidance=cfg_guid)[0]
             self.pos_cond = self.fluxguidance.append(conditioning=self.pos_cond, guidance=cfg_guid)[0]
@@ -140,21 +174,27 @@ class SampleAssembler:
         else:
             if changed == cfg_guid and hasattr(self, "pos_cond"):
                 if neg is None:
-                    if "skip_emptyneg" in self.sca_dict["extra_opts"]:
+                    if "skip_emptyneg" in extra_opts:
                         self._guider(model, cfg_guid)
                 elif hasattr(self, "neg_cond"):
                     self._guider(model, cfg_guid, neg=True)
             else:
-                self.pos_cond = self.sdclip.encode(clip=clip, text=pos[0])[0]
+                self.pos_cond = self.sdclip.encode(clip=clip, text=pos)[0]
+                if "pos_guidance" in extra_opts:
+                    self._instance("fluxguidance")
+                    self.pos_cond = self.fluxguidance.append(conditioning=self.pos_cond, guidance=cfg_guid)[0]
                 if neg is None:
-                    if "skip_emptyneg" in self.sca_dict["extra_opts"]:
+                    if "skip_emptyneg" in extra_opts:
+                        self._instance("datahandler")
+                        self.pos_cond = multiply_tensors(self.pos_cond, left_f=extra_opts["left_f"], right_f=extra_opts["right_f"])
                         self._guider(model, cfg_guid)
                     else:
                         neg_copy = self.pos_cond.copy()
+                        self._instance("cond_zero_out")
                         self.neg_cond = self.cond_zero_out.zero_out(conditioning=neg_copy)[0]
                         self._guider(model, cfg_guid, neg=True)
                 elif neg is not None:
-                    self.neg_cond = self.sdclip.encode(clip=clip, text=neg[0])[0]
+                    self.neg_cond = self.sdclip.encode(clip=clip, text=neg)[0]
                     self._guider(model, cfg_guid, neg=True)
                 else:
                     logger.info("Error: get_guider()")
@@ -165,7 +205,7 @@ class SampleAssembler:
             self.sigmas = self.basic_scheduler.get_sigmas(model=model, scheduler=scheduler, steps=steps, denoise=denoise)[0]
 
     def _get_sampler(self, changed="ALL"):
-        sampler_name = self._getitem(self._get_dicts["sampler_dict"])
+        sampler_name = self.sca_dict["sampler_name"]
         if changed == "ALL":
             self.sampler = sampler_object(sampler_name)
 
@@ -213,5 +253,5 @@ class SampleAssembler:
 
     def _getitem(self, input_dict):
         if isinstance(input_dict, dict):
-            return list(input_dict.keys())
+            return list(input_dict.values())
         raise TypeError("Input must be a dictionary")

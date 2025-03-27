@@ -56,6 +56,34 @@ class MergeExtraOpts:
         extra_opts = {**extra_opts1, **extra_opts2}
         return extra_opts
 
+class CFGExtraOpts:
+    @classmethod
+    def INPUT_TYPES(s):
+        return {"required": {
+            "cfg_zero_star": ("BOOLEAN", {"default": False, "label_on": "On", "label_off": "Off"} ),
+            "pos_guidance": ("BOOLEAN", {"default": False, "label_on": "On", "label_off": "Off"} ),
+        },
+        "optional": {
+          "prev_opts": ("EXTRA_OPTS", ),
+        }}
+    RETURN_TYPES = ("EXTRA_OPTS", )
+    RETURN_NAMES = ("extra_opts", )
+    FUNCTION = "pack_extra_opts"
+    CATEGORY = CATEGORY.MAIN.value + CATEGORY.EXTRAOPTS.value
+
+    def pack_extra_opts(self, cfg_zero_star, pos_guidance, prev_opts=None):
+        extra_opts = {}
+        if prev_opts is None:
+            prev_opts = {}
+        if cfg_zero_star is True:
+            extra_opts = {**extra_opts, "cfg_zero_star": True}
+        if pos_guidance is True:
+            extra_opts = {**extra_opts, "pos_guidance": True}
+        get_merged_opts = MergeExtraOpts()
+        extra_opts = get_merged_opts.merge_extra_opts(prev_opts, extra_opts)
+        return (extra_opts, )
+
+
 class KeyframeExtraOpts:
     @classmethod
     def INPUT_TYPES(s):
@@ -196,6 +224,8 @@ class CondNoEmptyNegExtraOpts:
     def INPUT_TYPES(s):
         return {"required": {
                     "skip_emptyneg": ("BOOLEAN", {"default": True, "label_on": "On", "label_off": "Off"} ),
+                    "left_f": ("FLOAT", {"default": 1.00, "min": -100.00, "max": 100.00, "step": 0.01}),
+                    "right_f": ("FLOAT", {"default": 1.00, "min": -100.00, "max": 100.00, "step": 0.01}),
                 },
                 "optional": {
                     "prev_opts": ("EXTRA_OPTS", ),
@@ -205,12 +235,15 @@ class CondNoEmptyNegExtraOpts:
     RETURN_NAMES = ("extra_opts", )
     FUNCTION = "pack_extra_opts"
     CATEGORY = CATEGORY.MAIN.value + CATEGORY.EXTRAOPTS.value
-    def pack_extra_opts(self, skip_emptyneg, prev_opts=None):
+    def pack_extra_opts(self, skip_emptyneg, left_f, right_f, prev_opts=None):
         extra_opts = {}
         if prev_opts is None:
             prev_opts = {}
         if skip_emptyneg is True:
             extra_opts = {"skip_emptyneg": True}
+            extra_opts1 = {"left_f": left_f}
+            extra_opts2 = {"right_f": right_f}
+            extra_opts = {**extra_opts, **extra_opts1, **extra_opts2}
         get_merged_opts = MergeExtraOpts()
         extra_opts = get_merged_opts.merge_extra_opts(prev_opts, extra_opts)
         return (extra_opts, )
@@ -536,6 +569,7 @@ class batchsize_ExtraOpts:
 NODE_CLASS_MAPPINGS = {
     "ViewExtraOpts": ViewExtraOpts,
     "MergeExtraOpts": MergeExtraOpts,
+    "CFGExtraOpts": CFGExtraOpts,
     "VAE_ExtraOpts": VAE_ExtraOpts,
     "COND_ExtraOpts": COND_ExtraOpts,
     "COND_ExtraOpts_2": COND_ExtraOpts_2,
@@ -554,6 +588,7 @@ NODE_CLASS_MAPPINGS = {
 NODE_DISPLAY_NAME_MAPPINGS = {
     "ViewExtraOpts": prefix + "ViewExtraOpts",
     "MergeExtraOpts": prefix + "MergeExtraOpts",
+    "CFGExtraOpts": prefix + "CFGExtraOpts",
     "VAE_ExtraOpts": prefix + "VAE_ExtraOpts",
     "COND_ExtraOpts": prefix + "COND_ExtraOpts",
     "COND_ExtraOpts_2": prefix + "COND_ExtraOpts_2",

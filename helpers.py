@@ -256,8 +256,9 @@ def multiply_tensors(tensors, factor=1.0, left_f=None, right_f=None):
         get_datahandler = DataHandler()
         pooled_output = tensors[0][1]['pooled_output']
         tensors = get_datahandler.flatten(tensors)[0]
-        if left_f is None and right_f is None:
+        if left_f is None:
             left_f = factor
+        if right_f is None:
             right_f = factor
         tensors = tensors * left_f
         pooled_output = pooled_output * right_f

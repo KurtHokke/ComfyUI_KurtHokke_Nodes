@@ -1,6 +1,8 @@
 from khn.utils import CATEGORY, MODEL_TYPES, any, prefix
 from khn.loggers import get_logger
 from khn.core import SampleAssembler
+from sympy.strategies.branch import debug
+
 from comfy.comfy_types import *
 import comfy.samplers
 from comfy_extras.nodes_custom_sampler import SamplerCustomAdvanced, BasicScheduler, BetaSamplingScheduler
@@ -27,6 +29,7 @@ class AIO:
                 "width": ("INT", {"default": 1024, "min": 16, "max": MAX_RESOLUTION, "step": 16}),
                 "height": ("INT", {"default": 1024, "min": 16, "max": MAX_RESOLUTION, "step": 16}),
                 "noise_seed": ("INT", {"default": 0, "min": 0, "max": 0xffffffffffffffff}),
+                "debug_output": ("BOOLEAN", {"default": False, "defaultInput": False}),
             },
             "optional": {
                 "model": ("MODEL", ),
@@ -44,7 +47,7 @@ class AIO:
 
     def determine_sample_settings(self, cfg_guidance: float, sampler_name: list[str], scheduler: list[str],
                                   steps: int, denoise: float, width: int, height: int, noise_seed: int,
-                                  model=None, vae=None, pos=None, neg=None, g_s_s_s=None, extra_opts=None) -> tuple[list[any]]:
+                                  debug_output: bool, model=None, vae=None, pos=None, neg=None, g_s_s_s=None, extra_opts=None) -> tuple[list[any]]:
         if extra_opts is None:
             extra_opts = {}
         if pos is not None:
@@ -71,9 +74,9 @@ class AIO:
         else:
             return logger.info("No positive prompts provided")
         if self.processAIO is None:
-            self.processAIO = SampleAssembler(sca_dict)
+            self.processAIO = SampleAssembler(sca_dict, debug_output)
 
-        sca_pipe = self.processAIO.update(sca_dict, noise_seed)
+        sca_pipe = self.processAIO.update(sca_dict, noise_seed, debug_output)
 
         return (sca_pipe, )
 
