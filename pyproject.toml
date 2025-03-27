@@ -1,9 +1,9 @@
 [project]
 name = "ComfyUI_KurtHokke-Nodes"
 description = ""
-version = "1.0.0"
+version = "1.0.1"
 license = {file = "LICENSE"}
-dependencies = ["math"]
+dependencies = ["black"]
 
 [project.urls]
 Repository = "https://github.com/KurtHokke/ComfyUI_KurtHokke-Nodes"
