@@ -1,4 +1,4 @@
-from khn.utils import CATEGORY, prefix
+from custom_nodes.ComfyUI_KurtHokke_Nodes.utils import CATEGORY, prefix
 import json
 import folder_paths
 import re

@@ -1,8 +1,8 @@
 import folder_paths
 import node_helpers
-from khn.utils import CATEGORY, NONE_EMBEDDINGS, any, prefix
-from khn.loggers import get_logger
-from khn.helpers import DataHandler
+from custom_nodes.ComfyUI_KurtHokke_Nodes.utils import CATEGORY, NONE_EMBEDDINGS, any, prefix
+from custom_nodes.ComfyUI_KurtHokke_Nodes.loggers import get_logger
+from custom_nodes.ComfyUI_KurtHokke_Nodes.helpers import DataHandler
 from comfy.comfy_types import IO, ComfyNodeABC, InputTypeDict
 import random
 import torch

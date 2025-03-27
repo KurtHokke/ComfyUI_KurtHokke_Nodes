@@ -1,4 +1,4 @@
-from khn.utils import CATEGORY, MODEL_TYPES, any, logger, prefix
+from custom_nodes.ComfyUI_KurtHokke_Nodes.utils import CATEGORY, MODEL_TYPES, any, logger, prefix
 from comfy.comfy_types import *
 import node_helpers
 import comfy.samplers
@@ -81,7 +81,7 @@ class AIO_Tuner_Pipe:
         if extra_opts == {}:
             extra_opts = None
         if extra_opts is not None and "cond" in extra_opts and len(positive) == 2:
-            from khn.nodes.cond import ApplyCondsExtraOpts
+            from custom_nodes.ComfyUI_KurtHokke_Nodes.nodes.cond import ApplyCondsExtraOpts
             get_applycondsextraopts = ApplyCondsExtraOpts()
             if "seed" not in extra_opts:
                 extra_opts5 = {"seed": noise_seed}

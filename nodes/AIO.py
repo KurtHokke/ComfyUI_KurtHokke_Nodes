@@ -1,6 +1,6 @@
-from khn.utils import CATEGORY, MODEL_TYPES, any, prefix
-from khn.loggers import get_logger
-from khn.core import SampleAssembler
+from custom_nodes.ComfyUI_KurtHokke_Nodes.utils import CATEGORY, MODEL_TYPES, any, prefix
+from custom_nodes.ComfyUI_KurtHokke_Nodes.loggers import get_logger
+from custom_nodes.ComfyUI_KurtHokke_Nodes.core import SampleAssembler
 from sympy.strategies.branch import debug
 
 from comfy.comfy_types import *

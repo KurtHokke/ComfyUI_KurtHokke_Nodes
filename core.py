@@ -1,4 +1,4 @@
-from khn.loggers import get_logger
+from custom_nodes.ComfyUI_KurtHokke_Nodes.loggers import get_logger
 from .helpers import multiply_tensors
 from comfy.samplers import CFGGuider, sampler_object
 from comfy.comfy_types import IO, InputTypeDict

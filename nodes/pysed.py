@@ -1,5 +1,5 @@
-from khn.utils import CATEGORY, prefix
-from khn.packages.PythonSed import Sed, SedException
+from custom_nodes.ComfyUI_KurtHokke_Nodes.utils import CATEGORY, prefix
+from custom_nodes.ComfyUI_KurtHokke_Nodes.packages.PythonSed import Sed, SedException
 import io
 import re
 

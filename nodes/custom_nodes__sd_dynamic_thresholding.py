@@ -1,17 +1,15 @@
-
 #Stolen from https://github.com/mcmonkeyprojects/sd-dynamic-thresholding
 #Thanks!
 
-from khn.utils import CATEGORY, prefix
-#from custom_nodes.sd-dynamic-thresholding.dynthres_core import DynThresh
+from custom_nodes.ComfyUI_KurtHokke_Nodes.utils import CATEGORY, prefix
 import importlib
 
-# Import the module with a hyphen in its name
-module_name = 'custom_nodes.sd-dynamic-thresholding.dynthres_core'
-dyn_thresh_module = importlib.import_module(module_name)
+try:
+    dyn_thresh_module = importlib.import_module("custom_nodes.sd-dynamic-thresholding.dynthres_core")
+    DynThresh = dyn_thresh_module.DynThresh
+except ModuleNotFoundError:
+    dyn_thresh_module = None
 
-# Now you can access DynThresh from the imported module
-DynThresh = dyn_thresh_module.DynThresh
 
 
 class DynamicThresholding:
@@ -103,12 +101,15 @@ class DynamicThresholdingBasic:
         m.set_model_sampler_cfg_function(sampler_dyn_thresh)
         return (m, )
 
-
-NODE_CLASS_MAPPINGS = {
-    "DynamicThresholding": DynamicThresholding,
-    "DynamicThresholdingBasic": DynamicThresholdingBasic,
-}
-NODE_DISPLAY_NAME_MAPPINGS = {
-    "DynamicThresholding": prefix + "DynamicThresholding",
-    "DynamicThresholdingBasic": prefix + "DynamicThresholdingBasic",
-}
+if dyn_thresh_module is not None:
+    NODE_CLASS_MAPPINGS = {
+        "DynamicThresholding": DynamicThresholding,
+        "DynamicThresholdingBasic": DynamicThresholdingBasic,
+    }
+    NODE_DISPLAY_NAME_MAPPINGS = {
+        "DynamicThresholding": prefix + "DynamicThresholding",
+        "DynamicThresholdingBasic": prefix + "DynamicThresholdingBasic",
+    }
+else:
+    NODE_CLASS_MAPPINGS = {}
+    NODE_DISPLAY_NAME_MAPPINGS = {}

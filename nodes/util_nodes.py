@@ -1,5 +1,5 @@
-from khn.utils import CATEGORY, any, logger, OPERATIONS, prefix
-from khn.helpers import DataHandler
+from custom_nodes.ComfyUI_KurtHokke_Nodes.utils import CATEGORY, any, logger, OPERATIONS, prefix
+from custom_nodes.ComfyUI_KurtHokke_Nodes.helpers import DataHandler
 from comfy.comfy_types import *
 
 

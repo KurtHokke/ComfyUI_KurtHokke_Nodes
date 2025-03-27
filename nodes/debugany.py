@@ -1,7 +1,7 @@
-from khn.utils import CATEGORY, any, prefix
-from khn.helpers import DataHandler
-from khn.helpers import ConfigManager, restricted_import, original_import
-from khn.loggers import get_logger
+from custom_nodes.ComfyUI_KurtHokke_Nodes.utils import CATEGORY, any, prefix
+from custom_nodes.ComfyUI_KurtHokke_Nodes.helpers import DataHandler
+from custom_nodes.ComfyUI_KurtHokke_Nodes.helpers import ConfigManager, restricted_import, original_import
+from custom_nodes.ComfyUI_KurtHokke_Nodes.loggers import get_logger
 import builtins
 import black
 import json

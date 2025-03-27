@@ -1,4 +1,4 @@
-from khn.utils import CATEGORY, any, logger, CLIP_DTYPES, prefix
+from custom_nodes.ComfyUI_KurtHokke_Nodes.utils import CATEGORY, any, logger, CLIP_DTYPES, prefix
 
 from typing import TYPE_CHECKING, Union
 import logging

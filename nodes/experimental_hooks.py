@@ -9,8 +9,8 @@ import comfy.utils
 import comfy.hooks
 from comfy_extras.nodes_hooks import CreateHookLora
 import folder_paths
-from khn.utils import CATEGORY, NONE_EMBEDDINGS, prefix
-from khn.loggers import get_logger
+from custom_nodes.ComfyUI_KurtHokke_Nodes.utils import CATEGORY, NONE_EMBEDDINGS, prefix
+from custom_nodes.ComfyUI_KurtHokke_Nodes.loggers import get_logger
 from comfy.comfy_types import IO, ComfyNodeABC, InputTypeDict
 
 logger, log_all = get_logger("log_all")

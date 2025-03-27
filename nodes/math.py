@@ -4,7 +4,7 @@ https://github.com/crystian/ComfyUI-Crystools
 https://github.com/cubiq/ComfyUI_essentials
   Many thanks goes to these awesome developers!
 '''
-from khn.utils import CATEGORY, any, BOOLEAN, INT, FLOAT, STRING, prefix
+from custom_nodes.ComfyUI_KurtHokke_Nodes.utils import CATEGORY, any, BOOLEAN, INT, FLOAT, STRING, prefix
 import math
 import torch
 import time

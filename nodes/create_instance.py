@@ -1,6 +1,6 @@
-from khn.utils import CATEGORY, anytype, prefix
-from khn.helpers import check_string, find_and_import_class
-from khn.loggers import get_logger
+from custom_nodes.ComfyUI_KurtHokke_Nodes.utils import CATEGORY, anytype, prefix
+from custom_nodes.ComfyUI_KurtHokke_Nodes.helpers import check_string, find_and_import_class
+from custom_nodes.ComfyUI_KurtHokke_Nodes.loggers import get_logger
 from comfy.comfy_types import IO, InputTypeDict
 import sys
 import re

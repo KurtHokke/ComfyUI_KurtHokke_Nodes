@@ -1,10 +1,17 @@
-from khn.utils import CATEGORY, COND_OPTS, COND_DIRECTION, NONE_LORAS, any, prefix
-from khn.loggers import get_logger
+from custom_nodes.ComfyUI_KurtHokke_Nodes.utils import CATEGORY, COND_OPTS, COND_DIRECTION, NONE_LORAS, any, prefix
+from custom_nodes.ComfyUI_KurtHokke_Nodes.loggers import get_logger
 from nodes import MAX_RESOLUTION
-from custom_nodes.was_extras.ConditioningBlend import blending_modes
 from comfy.comfy_types import *
 import folder_paths
 import comfy.hooks
+
+try:
+    from custom_nodes.was_extras.ConditioningBlend import blending_modes
+except ImportError:
+    try:
+        from custom_nodes.WAS_Extras.ConditioningBlend import blending_modes
+    except ImportError:
+        blending_modes = None
 
 logger, log_all = get_logger("log_all")
 
@@ -566,12 +573,11 @@ class batchsize_ExtraOpts:
         return (extra_opts, )
 
 
-NODE_CLASS_MAPPINGS = {
+NODE_CLASS_MAPPINGS1 = {
     "ViewExtraOpts": ViewExtraOpts,
     "MergeExtraOpts": MergeExtraOpts,
     "CFGExtraOpts": CFGExtraOpts,
     "VAE_ExtraOpts": VAE_ExtraOpts,
-    "COND_ExtraOpts": COND_ExtraOpts,
     "COND_ExtraOpts_2": COND_ExtraOpts_2,
     "COND_SET_STRENGTH_ExtraOpts": COND_SET_STRENGTH_ExtraOpts,
     "MultiplyTensorsExtraOpts": MultiplyTensorsExtraOpts,
@@ -585,12 +591,11 @@ NODE_CLASS_MAPPINGS = {
     "CondNoEmptyNegExtraOpts": CondNoEmptyNegExtraOpts,
     "FluxExtraOpts": FluxExtraOpts,
 }
-NODE_DISPLAY_NAME_MAPPINGS = {
+NODE_DISPLAY_NAME_MAPPINGS1 = {
     "ViewExtraOpts": prefix + "ViewExtraOpts",
     "MergeExtraOpts": prefix + "MergeExtraOpts",
     "CFGExtraOpts": prefix + "CFGExtraOpts",
     "VAE_ExtraOpts": prefix + "VAE_ExtraOpts",
-    "COND_ExtraOpts": prefix + "COND_ExtraOpts",
     "COND_ExtraOpts_2": prefix + "COND_ExtraOpts_2",
     "COND_SET_STRENGTH_ExtraOpts": prefix + "COND_SET_STRENGTH_ExtraOpts",
     "MultiplyTensorsExtraOpts": prefix + "MultiplyTensorsExtraOpts",
@@ -604,3 +609,16 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "CondNoEmptyNegExtraOpts": prefix + "CondNoEmptyNegExtraOpts",
     "FluxExtraOpts": prefix + "FluxExtraOpts",
 }
+if blending_modes is not None:
+    NODE_CLASS_MAPPINGS2 = {
+        "COND_ExtraOpts": COND_ExtraOpts,
+    }
+    NODE_DISPLAY_NAME_MAPPINGS2 = {
+        "COND_ExtraOpts": prefix + "COND_ExtraOpts",
+    }
+else:
+    NODE_CLASS_MAPPINGS2 = {}
+    NODE_DISPLAY_NAME_MAPPINGS2 = {}
+
+NODE_CLASS_MAPPINGS = NODE_CLASS_MAPPINGS1.update(NODE_CLASS_MAPPINGS2)
+NODE_DISPLAY_NAME_MAPPINGS = NODE_DISPLAY_NAME_MAPPINGS1.update(NODE_DISPLAY_NAME_MAPPINGS2)

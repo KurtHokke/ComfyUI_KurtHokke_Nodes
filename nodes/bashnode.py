@@ -1,4 +1,4 @@
-from khn.utils import CATEGORY, any, prefix
+from custom_nodes.ComfyUI_KurtHokke_Nodes.utils import CATEGORY, any, prefix
 import subprocess
 
 class BashScriptNode:

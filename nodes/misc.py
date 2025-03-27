@@ -1,4 +1,4 @@
-from khn.utils import CATEGORY, parse_string_to_list, prefix
+from custom_nodes.ComfyUI_KurtHokke_Nodes.utils import CATEGORY, parse_string_to_list, prefix
 import comfy.model_management
 from nodes import MAX_RESOLUTION
 import torch
